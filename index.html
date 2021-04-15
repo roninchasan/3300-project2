@@ -1,0 +1,71 @@
+<html>
+    <head>
+        <title>INFO 3300 - Project 2 (rcc263, jmw555)</title>
+        
+        <!-- <link href="https://fonts.googleapis.com/css?family=Lato:400,700|Raleway:400,700" rel="stylesheet"> -->
+
+        
+        <!-- <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.14.2/styles/default.min.css">
+        <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.14.2/highlight.min.js"></script> -->
+        <script src="https://d3js.org/d3.v6.min.js"></script>
+        <script src="https://d3js.org/topojson.v3.min.js"></script>
+        <style>
+        
+        .nation {
+            fill: #ddd;
+            /* stroke: black; */
+        }
+        
+        .outline {
+            stroke: #fff;
+            stroke-width: 1px;
+            fill: none;
+        }
+        </style>
+    </head>
+
+    <body>
+        <svg id='choropleth' height="610" width="975" style="background: #fff; margin:50px"></svg>
+        <svg id='graph' height="610" width="975"></svg>
+        
+        <script>
+            const svg = d3.select("#choropleth");
+            const mapwidth = svg.attr("width");
+            const mapheight = svg.attr("height");
+            const map = svg.append("g");
+
+            const requestData = async function() {
+                //data awaits here
+
+                //data filtering & manipulation here
+
+                const us = await d3.json("/datasets/counties-10m.json");
+                var projection = d3.geoAlbersUsa().scale(1300).translate([487.5, 305]);
+                var path = d3.geoPath().projection(projection);
+
+                var nation = topojson.feature(us, us.objects.nation);
+                var states = topojson.feature(us, us.objects.states);
+                var statesMesh = topojson.mesh(us, us.objects.states);
+
+                map.selectAll("path.nation").data(nation.features)
+                .join("path")
+                .attr("class", "nation")
+                .attr("d", path)
+
+                map.append("path").datum(statesMesh)
+                .attr("class", "outline")
+                .attr("d", path)
+
+                // obmap.selectAll("path").data(states.features)
+                // .join("path")
+                // .attr('class', 'health')
+                // .attr("d", path) 
+                // .attr("fill", 'blue')
+
+            }
+            requestData()
+
+        </script>
+    
+    </body>
+</html>
