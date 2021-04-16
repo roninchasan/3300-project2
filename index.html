@@ -12,6 +12,7 @@
 
     <body>
         <div id="leagues"></div>
+        <div id="toggle"></div>
         <svg id="choropleth" height="610" width="975"></svg>
         <svg id = "colorScale" height = "100", width = "900"></svg>
         <svg id="graph" height="610" width="975"></svg>
@@ -207,7 +208,7 @@
                 .join("path")
                 // .attr('class', 'total')
                 .attr("d", path) 
-                .attr("fill", d => totalProportionScale(d.properties['Total Proportion']))
+                .attr("fill", d => totalScale(d.properties['Total Count']))
 
                 // map.selectAll("path").data(states.features)
                 // .join("path")
@@ -220,24 +221,40 @@
                 .attr("class", "outline")
                 .attr("d", path)
 
+                let pcts = false;
+
                 const logos = ["images/nba.png", "images/mlb.png", "images/nfl.svg", "images/nhl.png", "Total"];
                 logos.forEach( d => {
                     if (d !== 'Total') {
                         if (d === 'images/nba.png' ) {
                             d3.select("div#leagues")
                             .append("button")
-                            .attr("width", "100")
-                            .attr("height", "50")
+                                .attr("class", "league")
+                                .attr("width", "100")
+                                .attr("height", "50")
+                                .on("click", function(){
+                                    if (pcts) {
+                                        map.selectAll("path").data(states.features)
+                                            // .transition(25)
+                                            .attr("fill", d => nbaProportionScale(d.properties['NBA Proportion']));
+                                    } else {
+                                        map.selectAll("path").data(states.features)
+                                            // .transition(25)
+                                            .attr("fill", d => nbaScale(d.properties['NBA']));
+                                    }
+                                })
                             .append("img")
-                            .attr("src", d)
-                            .attr("alt", d)
-                            .attr("x", "60")
-                            .attr("y", "60")
-                            .attr("width", "70")
-                            .attr("height", "30");
+                                .attr("src", d)
+                                .attr("alt", d)
+                                .attr("x", "60")
+                                .attr("y", "60")
+                                .attr("width", "70")
+                                .attr("height", "40");
+
                         } else {
                             d3.select("div#leagues")
                             .append("button")
+                            .attr("class", "league")
                             .attr("width", "100")
                             .attr("height", "50")
                             .append("img")
@@ -245,13 +262,15 @@
                             .attr("alt", d)
                             .attr("x", "60")
                             .attr("y", "60")
-                            .attr("width", "30")
-                            .attr("height", "30");
+                            .attr("width", "40")
+                            .attr("height", "40");
                         }
                     } else {
                         d3.select("div#leagues")
                         .append("button")
+                        .attr("class", "league")
                         .text( d )
+                        .style("font-size", "1.7em")
                         .attr("width", "30")
                         .attr("height", "30");
                     }
@@ -259,6 +278,43 @@
                     // .on("click", function() {
                     // })
                 });
+                d3.select("div#toggle")
+                    .append("button")
+                    .attr('class', 'toggleButton')
+                    .attr('id', 'countButton')
+                    .text("Counts")
+                    .attr("width", "30")
+                    .attr("height", "30")
+                    .on("click", function(){
+                        map.selectAll("path").data(states.features)
+                            // .transition(25)
+                            .attr("fill", d => totalScale(d.properties['Total Count']));
+                        d3.select("button#countButton").transition(100).style("background-color", 'lightgrey').style("font-weight", "bold")
+                        d3.select("button#pctButton").transition(100).style("background-color", 'white').style("font-weight", "normal").style("color", "black")
+
+                        pcts = false;
+                    });
+
+                d3.select("div#toggle")
+                    .append("button")
+                    .attr('class', 'toggleButton')
+                    .attr('id', 'pctButton')
+                    .text("Percentages")
+                    .attr("width", "30")
+                    .attr("height", "30")
+                    .on("click", function(){
+                        map.selectAll("path").data(states.features)
+                            // .attr("d", path) 
+                            // .transition(25)
+                            .attr("fill", d => totalProportionScale(d.properties['Total Proportion']))
+
+                        d3.select("button#countButton").transition(100).style("background-color", 'white').style("font-weight", "normal")
+                        d3.select("button#pctButton").transition(100).style("background-color", 'lightgrey').style("font-weight", "bold")
+
+                        pcts = true;
+                    });
+
+                
             }
             requestData();
 
