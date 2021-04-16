@@ -19,7 +19,7 @@ svg{
     margin: 1em auto 2em auto;
 }
 
-.leagues {
+#leagues {
     display: flex;
     flex-direction: row;
 }
@@ -29,4 +29,6 @@ button {
     height: 50px;
     margin: 10px;
     background-color: white;
+    border: 2px solid black;
+    border-radius: 5px;
 }

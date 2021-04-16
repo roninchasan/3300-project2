@@ -220,22 +220,40 @@
                 .attr("class", "outline")
                 .attr("d", path)
 
-                const logos = ["images/nba.png", "images/mlb.png", "images/nfl.svg", "images/nhl.png", 'Total'];
+                const logos = ["images/nba.png", "images/mlb.png", "images/nfl.svg", "images/nhl.png", "Total"];
                 logos.forEach( d => {
                     if (d !== 'Total') {
-                        d3.select("div#leagues")
-                        .append("button")
-                        .append("img")
-                        .attr("src", d)
-                        .attr("alt", d)
-                        .attr("x", "60")
-                        .attr("y", "60")
-                        .attr("width", "30")
-                        .attr("height", "30");
+                        if (d === 'images/nba.png' ) {
+                            d3.select("div#leagues")
+                            .append("button")
+                            .attr("width", "100")
+                            .attr("height", "50")
+                            .append("img")
+                            .attr("src", d)
+                            .attr("alt", d)
+                            .attr("x", "60")
+                            .attr("y", "60")
+                            .attr("width", "70")
+                            .attr("height", "30");
+                        } else {
+                            d3.select("div#leagues")
+                            .append("button")
+                            .attr("width", "100")
+                            .attr("height", "50")
+                            .append("img")
+                            .attr("src", d)
+                            .attr("alt", d)
+                            .attr("x", "60")
+                            .attr("y", "60")
+                            .attr("width", "30")
+                            .attr("height", "30");
+                        }
                     } else {
                         d3.select("div#leagues")
                         .append("button")
                         .text( d )
+                        .attr("width", "30")
+                        .attr("height", "30");
                     }
                     
                     // .on("click", function() {
