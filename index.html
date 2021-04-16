@@ -115,6 +115,12 @@
                 //mapping data to states
                 totalCounts = []
 
+                nbaProportions = [];
+                mlbProportions = [];
+                nflProportions = [];
+                nhlProportions = [];
+                totalProportions = [];
+
                 function assignCounts(state, name, league, data){
                     found = false;
 
@@ -129,6 +135,8 @@
                         state.properties[league] = 0;
                     }
                     totalCounts.push(state.properties["Total Count"])
+
+                    
                 }
 
                 datasets = [nba, mlb, nfl, nhl]
@@ -147,7 +155,16 @@
 
                     for (i=0;i<datasets.length;i++){
                         assignCounts(state, name, leagues[i], datasets[i])
+                        state.properties[String(leagues[i] + ' Proportion')] = 100 * state.properties[leagues[i]]/state.properties["Population"]
                     }
+                    state.properties["Total Proportion"] = 100 * state.properties["Total Count"]/state.properties["Population"]
+                    totalProportions.push(100 * state.properties["Total Count"]/state.properties["Population"])
+                    nbaProportions.push(100 * state.properties["NBA"]/state.properties["Population"])
+                    mlbProportions.push(100 * state.properties["MLB"]/state.properties["Population"])
+                    nflProportions.push(100 * state.properties["NFL"]/state.properties["Population"])
+                    nhlProportions.push(100 * state.properties["NHL"]/state.properties["Population"])
+
+
 
                 });
                 console.log("States:", states);
@@ -156,12 +173,18 @@
                 // console.log("NBA", nba);
                 // console.log("NBA", nba);
                 
-                nbaExtent = d3.extent(nba, d => d['Count']);
-                mlbExtent = d3.extent(mlb, d => d['Count']);
-                nflExtent = d3.extent(nfl, d => d['Count']);
-                nhlExtent = d3.extent(nhl, d => d['Count']);
-                totalExtent = d3.extent(totalCounts)
+                let nbaExtent = d3.extent(nba, d => d['Count']);
+                let mlbExtent = d3.extent(mlb, d => d['Count']);
+                let nflExtent = d3.extent(nfl, d => d['Count']);
+                let nhlExtent = d3.extent(nhl, d => d['Count']);
+                let totalExtent = d3.extent(totalCounts)
                 // console.log(nflExtent)
+
+                let nbaProportionExtent = d3.extent(nbaProportions);
+                let mlbProportionExtent = d3.extent(mlbProportions);
+                let nflProportionExtent = d3.extent(nflProportions);
+                let nhlProportionExtent = d3.extent(nhlProportions);
+                let totalProportionExtent = d3.extent(totalProportions)
                 
                 let totalScale = d3.scaleLinear().domain(totalExtent).range(['lightgrey', 'darkgreen'])
                 let nbaScale = d3.scaleLinear().domain(nbaExtent).range(['lightgrey', 'darkorange'])
@@ -169,6 +192,11 @@
                 let nflScale = d3.scaleLinear().domain(nflExtent).range(['lightgrey', 'brown'])
                 let nhlScale = d3.scaleLinear().domain(nhlExtent).range(['lightgrey', 'darkblue'])
 
+                let totalProportionScale = d3.scaleLinear().domain(totalProportionExtent).range(['lightgrey', 'darkgreen'])
+                let nbaProportionScale = d3.scaleLinear().domain(nbaProportionExtent).range(['lightgrey', 'darkorange'])
+                let mlbProportionScale = d3.scaleLinear().domain(mlbProportionExtent).range(['lightgrey', 'darkred'])
+                let nflProportionScale = d3.scaleLinear().domain(nflProportionExtent).range(['lightgrey', 'brown'])
+                let nhlProportionScale = d3.scaleLinear().domain(nhlProportionExtent).range(['lightgrey', 'darkblue'])
 
 
                 // state coloring for total counts -- DO NOT DELETE
@@ -176,7 +204,7 @@
                 .join("path")
                 // .attr('class', 'total')
                 .attr("d", path) 
-                .attr("fill", d => totalScale(d.properties['Total Count']))
+                .attr("fill", d => totalProportionScale(d.properties['Total Proportion']))
 
                 // map.selectAll("path").data(states.features)
                 // .join("path")
