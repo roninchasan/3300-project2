@@ -37,12 +37,45 @@
             const requestData = async function() {
 
                 const mlb = await d3.csv("/datasets/MLB.csv");
-                const nba = await d3.csv("/datasets/NBA.csv");
+                let nba = await d3.csv("/datasets/NBA.csv");
                 const nfl = await d3.csv("/datasets/NFL.csv");
-                const nhl = await d3.csv("/datasets/NHL.csv");
+                let nhl = await d3.csv("/datasets/NHL.csv");
+
+                const population = await d3.csv("/datasets/population.csv");
+
 
                 //data filtering & manipulation here
-                mlbCounts
+                population.forEach( (d) => {
+                    d['2019 Population'] = Number(d['2019 Population']);
+                });
+
+                nhl = nhl.filter((d) => { return d["To"]==="2021"})
+                mlb.forEach( (d) => {
+                    d['Count'] = Number(d['Count']);
+                    d["State"] = String(d['State']).trim()
+                });
+                nba.forEach( (d) => {
+                    if (d['State'] === "DC") {
+                        d["State"] = "District of Columbia";
+                    } else { 
+                        words = String(d['State']).trim().toLowerCase().split(" ");
+                        cleanedString =""
+                        words.forEach( (word) => {
+                            cleanedString += (word[0].toUpperCase() + word.substr(1) + " ");
+                        })
+                        cleanedString = cleanedString.trim();
+                        d["State"] = cleanedString;
+                    }
+                });
+                nfl.forEach( (d) => {
+                    if (d['STATE'] === "D.C.") {
+                        d['STATE'] = "District of Columbia"
+                    }
+                    d['COUNT'] = Number(d['COUNT']);
+
+                })
+
+                //choropleth setup
 
                 const us = await d3.json("/datasets/counties-10m.json");
                 var projection = d3.geoAlbersUsa().scale(1300).translate([487.5, 305]);
@@ -62,23 +95,9 @@
                 .attr("d", path)
 
 
-                // state coloring
-                // map.selectAll("path").data(states.features)
-                // .join("path")
-                // .attr('class', 'health')
-                // .attr("d", path) 
-                // .attr("fill", 'blue')
-
-
-                
-
-                // console.log(nba);
-
-
-                // let states = [for (row of nba) nba.State];
                 function mapStates(league) {
                     var states = league.map(row => row["State"]);
-                    console.log(states);
+                    // console.log(states);
                     var league_obj = {};
 
                     states.forEach(state => {
@@ -88,7 +107,7 @@
                             league_obj[state] = 1;
                         }
                     });
-                    console.log(league_obj);
+                    // console.log(league_obj);
 
                     var league = [];
 
@@ -101,10 +120,69 @@
                 nba = mapStates(nba);
                 nhl = mapStates(nhl);
 
-                console.log("MLB", mlb);
-                console.log("NBA", nba);
-                console.log("NFL", nfl);
-                console.log("NHL", nhl);
+
+                //mapping data to states
+                states.features.forEach( (state) => {
+                    name = state.properties.name;
+
+                    population.forEach( (d) => {
+                        if ((d['State'] === name)) {
+                            state.properties['Population'] = d['2019 Population']
+                        }
+                    });
+
+                    state.properties["Total Count"] = 0;
+                    found = false;
+
+                    nba.forEach( (d) => {
+                        if ((d['State'] === name) && !found) {
+                            state.properties['NBA'] = d['Count']
+                            state.properties["Total Count"] += d['Count'];
+                            found = true;
+                        }
+                    });
+                    if (!found){
+                        state.properties['NBA'] = 0;
+                    }
+
+                    found = false;
+                    mlb.forEach( (d) => {
+                        if ((d['State'] === name) && !found) {
+                            state.properties['MLB'] = d['Count']
+                            state.properties["Total Count"] += d['Count'];
+                            found = true;
+                        }
+                    });
+                    if (!found){
+                        state.properties['MLB'] = 0;
+                    }
+
+                    found = false;
+                    nfl.forEach( (d) => {
+                        if ((d['STATE'] === name) && !found) {
+                            state.properties['NFL'] = d['COUNT']
+                            state.properties["Total Count"] += d['COUNT'];
+                            found = true;
+                        }
+                    });
+                    if (!found){
+                        state.properties['NFL'] = 0;
+                    }
+
+                    found = false;
+                    nhl.forEach( (d) => {
+                        if ((d['State'] === name) && !found) {
+                            state.properties['NHL'] = d['Count']
+                            state.properties["Total Count"] += d['Count'];
+                            found = true;
+                        }
+                    });
+                    if (!found){
+                        state.properties['NHL'] = 0;
+                    }
+
+                });
+                console.log(states)
 
 
                 map.append("path").datum(statesMesh)
