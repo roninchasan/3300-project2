@@ -9,11 +9,10 @@
         <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.14.2/highlight.min.js"></script> -->
         <script src="https://d3js.org/d3.v6.min.js"></script>
         <script src="https://d3js.org/topojson.v3.min.js"></script>
-        <style>
         
+        <style>
         .nation {
             fill: #ddd;
-            /* stroke: black; */
         }
         
         .outline {
@@ -35,9 +34,14 @@
             const map = svg.append("g");
 
             const requestData = async function() {
-                //data awaits here
+
+                const mlb = await d3.csv("/datasets/MLB.csv");
+                const nba = await d3.csv("/datasets/NBA.csv");
+                const nfl = await d3.csv("/datasets/NFL.csv");
+                const nhl = await d3.csv("/datasets/NHL.csv");
 
                 //data filtering & manipulation here
+                mlbCounts
 
                 const us = await d3.json("/datasets/counties-10m.json");
                 var projection = d3.geoAlbersUsa().scale(1300).translate([487.5, 305]);
@@ -58,23 +62,24 @@
 
 
                 // state coloring
-                // obmap.selectAll("path").data(states.features)
+                // map.selectAll("path").data(states.features)
                 // .join("path")
                 // .attr('class', 'health')
                 // .attr("d", path) 
                 // .attr("fill", 'blue')
 
 
-                const mlb = await d3.csv("/datasets/MLB.csv");
-                const nba = await d3.csv("/datasets/NBA.csv");
-                const nfl = await d3.csv("/datasets/NFL.csv");
-                const nhl = await d3.csv("/datasets/NHL.csv");
+                
 
                 console.log(mlb);
                 console.log(nba);
                 console.log(nfl);
                 console.log(nhl);
 
+
+                map.append("path").datum(statesMesh)
+                .attr("class", "outline")
+                .attr("d", path)
             }
             requestData()
 
