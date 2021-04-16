@@ -1,0 +1,20 @@
+body{
+    
+}
+
+.nation {
+    fill: #ddd;
+}
+
+.outline {
+    stroke: #fff;
+    stroke-width: 1px;
+    fill: none;
+}
+
+svg{
+    display: block;
+    background: none;
+    /* position:static; */
+    margin: 1em auto 2em auto;
+}

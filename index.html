@@ -3,29 +3,17 @@
     <head>
         <title>INFO 3300 - Project 2 (rcc263, jmw555)</title>
         
-        <!-- <link href="https://fonts.googleapis.com/css?family=Lato:400,700|Raleway:400,700" rel="stylesheet"> -->
+        <link rel="stylesheet" href="style.css">
 
-        
-        <!-- <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.14.2/styles/default.min.css">
-        <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/9.14.2/highlight.min.js"></script> -->
         <script src="https://d3js.org/d3.v6.min.js"></script>
         <script src="https://d3js.org/topojson.v3.min.js"></script>
         
-        <style>
-        .nation {
-            fill: #ddd;
-        }
-        
-        .outline {
-            stroke: #fff;
-            stroke-width: 1px;
-            fill: none;
-        }
-        </style>
     </head>
 
     <body>
-        <svg id="choropleth" height="610" width="975" style="background: #fff; margin:50px"></svg>
+        <div id="leagues"></div>
+        <svg id="choropleth" height="610" width="975"></svg>
+        <svg id = "colorScale" height = "100", width = "900"></svg>
         <svg id="graph" height="610" width="975"></svg>
         
         <script>
@@ -36,10 +24,10 @@
 
             const requestData = async function() {
 
-                const mlb = await d3.csv("/datasets/MLB.csv");
-                let nba = await d3.csv("/datasets/NBA.csv");
-                const nfl = await d3.csv("/datasets/NFL.csv");
-                let nhl = await d3.csv("/datasets/NHL.csv");
+                const mlb = await d3.csv("datasets/MLB.csv");
+                let nba = await d3.csv("datasets/NBA.csv");
+                const nfl = await d3.csv("datasets/NFL.csv");
+                let nhl = await d3.csv("datasets/NHL.csv");
 
                 const population = await d3.csv("/datasets/population.csv");
 
@@ -50,10 +38,13 @@
                 });
 
                 nhl = nhl.filter((d) => { return d["To"]==="2021"})
+
                 mlb.forEach( (d) => {
                     d['Count'] = Number(d['Count']);
                     d["State"] = String(d['State']).trim()
                 });
+
+                nba = nba.filter((d) => { return d["To"]==="2021"})
                 nba.forEach( (d) => {
                     if (d['State'] === "DC") {
                         d["State"] = "District of Columbia";
@@ -67,11 +58,12 @@
                         d["State"] = cleanedString;
                     }
                 });
+
                 nfl.forEach( (d) => {
-                    if (d['STATE'] === "D.C.") {
-                        d['STATE'] = "District of Columbia"
+                    if (d['State'] === "D.C.") {
+                        d['State'] = "District of Columbia"
                     }
-                    // d['COUNT'] = Number(d['COUNT']);
+                    d['Count'] = Number(d['Count']);
 
                 })
 
@@ -120,8 +112,28 @@
                 nba = mapStates(nba);
                 nhl = mapStates(nhl);
 
-
                 //mapping data to states
+                totalCounts = []
+
+                function assignCounts(state, name, league, data){
+                    found = false;
+
+                    data.forEach( (d) => {
+                        if ((d['State'] === name) && !found) {
+                            state.properties[league] = d['Count']
+                            state.properties["Total Count"] += d['Count'];
+                            found = true;
+                        }
+                    });
+                    if (!found){
+                        state.properties[league] = 0;
+                    }
+                    totalCounts.push(state.properties["Total Count"])
+                }
+
+                datasets = [nba, mlb, nfl, nhl]
+                leagues = ["NBA", "MLB", "NFL", "NHL"]
+
                 states.features.forEach( (state) => {
                     name = state.properties.name;
 
@@ -132,88 +144,52 @@
                     });
 
                     state.properties["Total Count"] = 0;
-                    found = false;
 
-                    nba.forEach( (d) => {
-                        if ((d['State'] === name) && !found) {
-                            state.properties['NBA'] = d['Count']
-                            state.properties["Total Count"] += d['Count'];
-                            found = true;
-                        }
-                    });
-                    if (!found){
-                        state.properties['NBA'] = 0;
-                    }
-
-                    found = false;
-                    mlb.forEach( (d) => {
-                        if ((d['State'] === name) && !found) {
-                            state.properties['MLB'] = d['Count']
-                            state.properties["Total Count"] += d['Count'];
-                            found = true;
-                        }
-                    });
-                    if (!found){
-                        state.properties['MLB'] = 0;
-                    }
-
-                    found = false;
-                    nfl.forEach( (d) => {
-                        if ((d['STATE'] === name) && !found) {
-                            state.properties['NFL'] = d['Count']
-                            state.properties["Total Count"] += d['Count'];
-                            found = true;
-                        }
-                    });
-                    if (!found){
-                        state.properties['NFL'] = 0;
-                    }
-
-                    found = false;
-                    nhl.forEach( (d) => {
-                        if ((d['State'] === name) && !found) {
-                            state.properties['NHL'] = d['Count']
-                            state.properties["Total Count"] += d['Count'];
-                            found = true;
-                        }
-                    });
-                    if (!found){
-                        state.properties['NHL'] = 0;
+                    for (i=0;i<datasets.length;i++){
+                        assignCounts(state, name, leagues[i], datasets[i])
                     }
 
                 });
                 console.log("States:", states);
-                console.log("NBA", nba);
-                console.log("NBA", nba);
-                console.log("NBA", nba);
-                console.log("NBA", nba);
-
-
-                function getExtents(data) {
-                    const countExtent = d3.extent(data, d => d['Count']);
-                    console.log(data, countExtent);
-                }
+                // console.log("NBA", nba);
+                console.log("NFL", nfl);
+                // console.log("NBA", nba);
+                // console.log("NBA", nba);
                 
-                getExtents(nba);
-                getExtents(mlb);
-                getExtents(nhl);
-                getExtents("nfl",nfl);
+                nbaExtent = d3.extent(nba, d => d['Count']);
+                mlbExtent = d3.extent(mlb, d => d['Count']);
+                nflExtent = d3.extent(nfl, d => d['Count']);
+                nhlExtent = d3.extent(nhl, d => d['Count']);
+                totalExtent = d3.extent(totalCounts)
+                // console.log(nflExtent)
                 
-                // let diverityScale = d3.scaleQuantile().domain(nyb.Total_Biodiversity_allvalues).range(colors);
+                let totalScale = d3.scaleLinear().domain(totalExtent).range(['lightgrey', 'darkgreen'])
+                let nbaScale = d3.scaleLinear().domain(nbaExtent).range(['lightgrey', 'darkorange'])
+                let mlbScale = d3.scaleLinear().domain(mlbExtent).range(['lightgrey', 'darkred'])
+                let nflScale = d3.scaleLinear().domain(nflExtent).range(['lightgrey', 'brown'])
+                let nhlScale = d3.scaleLinear().domain(nhlExtent).range(['lightgrey', 'darkblue'])
 
 
 
-                // state coloring
+                // state coloring for total counts -- DO NOT DELETE
+                map.selectAll("path").data(states.features)
+                .join("path")
+                // .attr('class', 'total')
+                .attr("d", path) 
+                .attr("fill", d => totalScale(d.properties['Total Count']))
+
                 // map.selectAll("path").data(states.features)
                 // .join("path")
-                // .attr('class', 'health')
+                // .attr('class', 'mlb')
                 // .attr("d", path) 
-                // .attr("fill", idk we'll figure this out later)
+                // .attr("fill", d => nbaScale(d.properties['NBA']))
 
 
                 map.append("path").datum(statesMesh)
                 .attr("class", "outline")
                 .attr("d", path)
+
+                // drawLegend(d3.select("#colorLegend"), totalScale)
             }
             requestData();
 
