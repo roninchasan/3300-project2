@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html>
     <head>
         <title>INFO 3300 - Project 2 (rcc263, jmw555)</title>
@@ -24,8 +25,8 @@
     </head>
 
     <body>
-        <svg id='choropleth' height="610" width="975" style="background: #fff; margin:50px"></svg>
-        <svg id='graph' height="610" width="975"></svg>
+        <svg id="choropleth" height="610" width="975" style="background: #fff; margin:50px"></svg>
+        <svg id="graph" height="610" width="975"></svg>
         
         <script>
             const svg = d3.select("#choropleth");
@@ -71,10 +72,39 @@
 
                 
 
-                console.log(mlb);
-                console.log(nba);
-                console.log(nfl);
-                console.log(nhl);
+                // console.log(nba);
+
+
+                // let states = [for (row of nba) nba.State];
+                function mapStates(league) {
+                    var states = league.map(row => row["State"]);
+                    console.log(states);
+                    var league_obj = {};
+
+                    states.forEach(state => {
+                        if (league_obj[state]) {
+                            league_obj[state]++;
+                        } else {
+                            league_obj[state] = 1;
+                        }
+                    });
+                    console.log(league_obj);
+
+                    var league = [];
+
+                    for (let state in league_obj) {
+                        league.push({"State": state, "Count": league_obj[state]});
+                    }
+                    
+                    return league;
+                }
+                nba = mapStates(nba);
+                nhl = mapStates(nhl);
+
+                console.log("MLB", mlb);
+                console.log("NBA", nba);
+                console.log("NFL", nfl);
+                console.log("NHL", nhl);
 
 
                 map.append("path").datum(statesMesh)
