@@ -148,6 +148,7 @@
                     population.forEach( (d) => {
                         if ((d['State'] === name)) {
                             state.properties['Population'] = d['2019 Population']
+                            
                         }
                     });
 
@@ -169,15 +170,17 @@
                 });
                 console.log("States:", states);
                 // console.log("NBA", nba);
-                console.log("NFL", nfl);
+                // console.log("NFL", nfl);
                 // console.log("NBA", nba);
                 // console.log("NBA", nba);
                 
-                let nbaExtent = d3.extent(nba, d => d['Count']);
-                let mlbExtent = d3.extent(mlb, d => d['Count']);
-                let nflExtent = d3.extent(nfl, d => d['Count']);
-                let nhlExtent = d3.extent(nhl, d => d['Count']);
-                let totalExtent = d3.extent(totalCounts)
+                nbaExtent = d3.extent(nba, d => d['Count']);
+                mlbExtent = d3.extent(mlb, d => d['Count']);
+                nflExtent = d3.extent(nfl, d => d['Count']);
+                nhlExtent = d3.extent(nhl, d => d['Count']);
+                totalExtent = d3.extent(totalCounts)
+
+                // populationExtent
                 // console.log(nflExtent)
 
                 let nbaProportionExtent = d3.extent(nbaProportions);
@@ -217,7 +220,27 @@
                 .attr("class", "outline")
                 .attr("d", path)
 
-                // drawLegend(d3.select("#colorLegend"), totalScale)
+                const logos = ["images/nba.png", "images/mlb.png", "images/nfl.svg", "images/nhl.png", 'Total'];
+                logos.forEach( d => {
+                    if (d !== 'Total') {
+                        d3.select("div#leagues")
+                        .append("button")
+                        .append("img")
+                        .attr("src", d)
+                        .attr("alt", d)
+                        .attr("x", "60")
+                        .attr("y", "60")
+                        .attr("width", "30")
+                        .attr("height", "30");
+                    } else {
+                        d3.select("div#leagues")
+                        .append("button")
+                        .text( d )
+                    }
+                    
+                    // .on("click", function() {
+                    // })
+                });
             }
             requestData();
 
