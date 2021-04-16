@@ -71,7 +71,7 @@
                     if (d['STATE'] === "D.C.") {
                         d['STATE'] = "District of Columbia"
                     }
-                    d['COUNT'] = Number(d['COUNT']);
+                    // d['COUNT'] = Number(d['COUNT']);
 
                 })
 
@@ -160,8 +160,8 @@
                     found = false;
                     nfl.forEach( (d) => {
                         if ((d['STATE'] === name) && !found) {
-                            state.properties['NFL'] = d['COUNT']
-                            state.properties["Total Count"] += d['COUNT'];
+                            state.properties['NFL'] = d['Count']
+                            state.properties["Total Count"] += d['Count'];
                             found = true;
                         }
                     });
@@ -182,7 +182,25 @@
                     }
 
                 });
-                console.log(states)
+                console.log("States:", states);
+                console.log("NBA", nba);
+                console.log("NBA", nba);
+                console.log("NBA", nba);
+                console.log("NBA", nba);
+
+
+                function getExtents(data) {
+                    const countExtent = d3.extent(data, d => d['Count']);
+                    console.log(data, countExtent);
+                }
+                
+                getExtents(nba);
+                getExtents(mlb);
+                getExtents(nhl);
+                getExtents("nfl",nfl);
+                
+                // let diverityScale = d3.scaleQuantile().domain(nyb.Total_Biodiversity_allvalues).range(colors);
+
 
 
                 // state coloring
@@ -197,7 +215,7 @@
                 .attr("class", "outline")
                 .attr("d", path)
             }
-            requestData()
+            requestData();
 
         </script>
     
