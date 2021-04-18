@@ -233,15 +233,7 @@
                                 .attr("width", "100")
                                 .attr("height", "50")
                                 .on("click", function(){
-                                    if (pcts) {
-                                        map.selectAll("path").data(states.features)
-                                            // .transition(25)
-                                            .attr("fill", d => nbaProportionScale(d.properties['NBA Proportion']));
-                                    } else {
-                                        map.selectAll("path").data(states.features)
-                                            // .transition(25)
-                                            .attr("fill", d => nbaScale(d.properties['NBA']));
-                                    }
+                                    updateMap(d);
                                 })
                             .append("img")
                                 .attr("src", d)
@@ -249,7 +241,7 @@
                                 .attr("x", "60")
                                 .attr("y", "60")
                                 .attr("width", "70")
-                                .attr("height", "40");
+                                .attr("height", "40")
 
                         } else {
                             d3.select("div#leagues")
@@ -257,6 +249,10 @@
                             .attr("class", "league")
                             .attr("width", "100")
                             .attr("height", "50")
+                            .attr("league", d)
+                            .on("click", function(){
+                                updateMap(d);
+                            })
                             .append("img")
                             .attr("src", d)
                             .attr("alt", d)
@@ -272,7 +268,10 @@
                         .text( d )
                         .style("font-size", "1.7em")
                         .attr("width", "30")
-                        .attr("height", "30");
+                        .attr("height", "30")
+                        .on("click", function(){
+                            updateMap(d);
+                        });
                     }
                     
                     // .on("click", function() {
@@ -313,6 +312,63 @@
 
                         pcts = true;
                     });
+
+                
+
+                function updateMap(d) {
+                    const pctDict = {"images/nba.png": nbaProportionScale, "images/mlb.png": mlbProportionScale, "images/nfl.svg": nflProportionScale, "images/nhl.png": nhlProportionScale, "Total": totalProportionScale};
+                    const countDict = {"images/nba.png": nbaScale, "images/mlb.png": mlbScale, "images/nfl.svg": nflScale, "images/nhl.png": nhlScale, "Total": totalScale};
+
+                    proportionDict = {"images/nba.png": 'NBA Proportion', "images/mlb.png": 'MLB Proportion', "images/nfl.svg": 'NFL Proportion', "images/nhl.png": 'NHL Proportion', "Total": 'Total Proportion'};
+                    leagueDict = {"images/nba.png": 'NBA', "images/mlb.png": 'MLB', "images/nfl.svg": 'NFL', "images/nhl.png": 'NHL', "Total": 'Total Count'};
+
+                    console.log(d);
+                    console.log(leagueDict[d]);
+
+
+                    if (pcts) {
+                        map.selectAll("path").data(states.features)
+                        .attr("fill", s => pctDict[d](s.properties[proportionDict[d]]));
+                    } else {
+                        map.selectAll("path").data(states.features)
+                            .attr("fill", s => countDict[d](s.properties[leagueDict[d]]));
+                    }
+
+                    // console.log(d);
+
+                    // if (d === "images/mlb.png") {
+                    //     if (pcts) {
+                    //         map.selectAll("path").data(states.features)
+                    //         // .transition(25)
+                    //         .attr("fill", d => mlbProportionScale(d.properties['MLB Proportion']));
+                    //     } else {
+                    //         map.selectAll("path").data(states.features)
+                    //             // .transition(25)
+                    //             .attr("fill", d => mlbScale(d.properties['MLB']));
+                    //     }
+                    // } else if (d === "images/nfl.svg") {
+                    //     if (pcts) {
+                    //         map.selectAll("path").data(states.features)
+                    //         // .transition(25)
+                    //         .attr("fill", d => nflProportionScale(d.properties['NFL Proportion']));
+                    //     } else {
+                    //         map.selectAll("path").data(states.features)
+                    //             // .transition(25)
+                    //             .attr("fill", d => nflScale(d.properties['NFL']));
+                    //     }
+                    // } else if (d === "images/nhl.png") {
+                    //     if (pcts) {
+                    //         map.selectAll("path").data(states.features)
+                    //         // .transition(25)
+                    //         .attr("fill", d => nhlProportionScale(d.properties['NHL Proportion']));
+                    //     } else {
+                    //         map.selectAll("path").data(states.features)
+                    //             // .transition(25)
+                    //             .attr("fill", d => nhlScale(d.properties['NHL']));
+                    //     }
+                    // }
+
+                }
 
                 
             }
