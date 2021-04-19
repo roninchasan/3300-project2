@@ -322,6 +322,7 @@
                             d3.select("div#leagues")
                             .append("button")
                                 .attr("class", "league")
+                                .attr("id", d)
                                 .attr("width", "100")
                                 .attr("height", "50")
                                 .on("click", function(){
@@ -338,10 +339,10 @@
                         } else {
                             d3.select("div#leagues")
                             .append("button")
+                            .attr("id", d)
                             .attr("class", "league")
                             .attr("width", "100")
                             .attr("height", "50")
-                            .attr("league", d)
                             .on("click", function(){
                                 updateMap(d);
                             })
@@ -357,6 +358,7 @@
                         d3.select("div#leagues")
                         .append("button")
                         .attr("class", "league")
+                        .attr("id", d)
                         .text( d )
                         .style("font-size", "1.7em")
                         .attr("width", "30")
@@ -366,9 +368,10 @@
                         });
                     }
                     
-                    // .on("click", function() {
-                    // })
                 });
+
+                var clicked = "Total";
+
                 d3.select("div#toggle")
                     .append("button")
                     .attr('class', 'toggleButton')
@@ -377,13 +380,10 @@
                     .attr("width", "30")
                     .attr("height", "30")
                     .on("click", function(){
-                        map.selectAll("path").data(states.features)
-                            // .transition(25)
-                            .attr("fill", d => totalScale(d.properties['Total Count']));
+                        pcts = false;
+                        updateMap(clicked);
                         d3.select("button#countButton").transition(100).style("background-color", 'lightgrey').style("font-weight", "bold")
                         d3.select("button#pctButton").transition(100).style("background-color", 'white').style("font-weight", "normal").style("color", "black")
-
-                        pcts = false;
                     });
 
                 d3.select("div#toggle")
@@ -394,29 +394,23 @@
                     .attr("width", "30")
                     .attr("height", "30")
                     .on("click", function(){
-                        map.selectAll("path").data(states.features)
-                            // .attr("d", path) 
-                            // .transition(25)
-                            .attr("fill", d => totalProportionScale(d.properties['Total Proportion']))
-
+                        pcts = true;
+                        updateMap(clicked);
                         d3.select("button#countButton").transition(100).style("background-color", 'white').style("font-weight", "normal")
                         d3.select("button#pctButton").transition(100).style("background-color", 'lightgrey').style("font-weight", "bold")
-
-                        pcts = true;
                     });
 
                 
 
                 function updateMap(d) {
+
+                    clicked = d;
+
                     const pctDict = {"images/nba.png": nbaProportionScale, "images/mlb.png": mlbProportionScale, "images/nfl.svg": nflProportionScale, "images/nhl.png": nhlProportionScale, "Total": totalProportionScale};
                     const countDict = {"images/nba.png": nbaScale, "images/mlb.png": mlbScale, "images/nfl.svg": nflScale, "images/nhl.png": nhlScale, "Total": totalScale};
 
                     proportionDict = {"images/nba.png": 'NBA Proportion', "images/mlb.png": 'MLB Proportion', "images/nfl.svg": 'NFL Proportion', "images/nhl.png": 'NHL Proportion', "Total": 'Total Proportion'};
                     leagueDict = {"images/nba.png": 'NBA', "images/mlb.png": 'MLB', "images/nfl.svg": 'NFL', "images/nhl.png": 'NHL', "Total": 'Total Count'};
-
-                    console.log(d);
-                    console.log(leagueDict[d]);
-
 
                     if (pcts) {
                         map.selectAll("path").data(states.features)
@@ -425,41 +419,6 @@
                         map.selectAll("path").data(states.features)
                             .attr("fill", s => countDict[d](s.properties[leagueDict[d]]));
                     }
-
-                    // console.log(d);
-
-                    // if (d === "images/mlb.png") {
-                    //     if (pcts) {
-                    //         map.selectAll("path").data(states.features)
-                    //         // .transition(25)
-                    //         .attr("fill", d => mlbProportionScale(d.properties['MLB Proportion']));
-                    //     } else {
-                    //         map.selectAll("path").data(states.features)
-                    //             // .transition(25)
-                    //             .attr("fill", d => mlbScale(d.properties['MLB']));
-                    //     }
-                    // } else if (d === "images/nfl.svg") {
-                    //     if (pcts) {
-                    //         map.selectAll("path").data(states.features)
-                    //         // .transition(25)
-                    //         .attr("fill", d => nflProportionScale(d.properties['NFL Proportion']));
-                    //     } else {
-                    //         map.selectAll("path").data(states.features)
-                    //             // .transition(25)
-                    //             .attr("fill", d => nflScale(d.properties['NFL']));
-                    //     }
-                    // } else if (d === "images/nhl.png") {
-                    //     if (pcts) {
-                    //         map.selectAll("path").data(states.features)
-                    //         // .transition(25)
-                    //         .attr("fill", d => nhlProportionScale(d.properties['NHL Proportion']));
-                    //     } else {
-                    //         map.selectAll("path").data(states.features)
-                    //             // .transition(25)
-                    //             .attr("fill", d => nhlScale(d.properties['NHL']));
-                    //     }
-                    // }
-
                 }
 
             
