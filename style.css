@@ -55,8 +55,8 @@ svg{
     border-radius: 0 10px 10px 0;
     border-left: none;
     margin: 10px 10px 10px 0px;
-
 }
+
 
 .hoverInfo rect{
     padding: 50px;
@@ -71,4 +71,8 @@ svg{
     stroke: black;
     stroke-width: 2px;
     fill: none;
+}
+
+#Total {
+    border: 3px solid red;
 }

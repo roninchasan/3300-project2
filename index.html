@@ -316,13 +316,14 @@
                 let pcts = false;
 
                 const logos = ["images/nba.png", "images/mlb.png", "images/nfl.svg", "images/nhl.png", "Total"];
+                const leagueDict = {"images/nba.png": 'NBA', "images/mlb.png": 'MLB', "images/nfl.svg": 'NFL', "images/nhl.png": 'NHL', "Total": 'Total Count'};
                 logos.forEach( d => {
                     if (d !== 'Total') {
                         if (d === 'images/nba.png' ) {
                             d3.select("div#leagues")
                             .append("button")
                                 .attr("class", "league")
-                                .attr("id", d)
+                                .attr("id", leagueDict[d])
                                 .attr("width", "100")
                                 .attr("height", "50")
                                 .on("click", function(){
@@ -339,7 +340,7 @@
                         } else {
                             d3.select("div#leagues")
                             .append("button")
-                            .attr("id", d)
+                            .attr("id", leagueDict[d])
                             .attr("class", "league")
                             .attr("width", "100")
                             .attr("height", "50")
@@ -358,7 +359,7 @@
                         d3.select("div#leagues")
                         .append("button")
                         .attr("class", "league")
-                        .attr("id", d)
+                        .attr("id", "Total")
                         .text( d )
                         .style("font-size", "1.7em")
                         .attr("width", "30")
@@ -410,14 +411,23 @@
                     const countDict = {"images/nba.png": nbaScale, "images/mlb.png": mlbScale, "images/nfl.svg": nflScale, "images/nhl.png": nhlScale, "Total": totalScale};
 
                     proportionDict = {"images/nba.png": 'NBA Proportion', "images/mlb.png": 'MLB Proportion', "images/nfl.svg": 'NFL Proportion', "images/nhl.png": 'NHL Proportion', "Total": 'Total Proportion'};
-                    leagueDict = {"images/nba.png": 'NBA', "images/mlb.png": 'MLB', "images/nfl.svg": 'NFL', "images/nhl.png": 'NHL', "Total": 'Total Count'};
-
+                    
                     if (pcts) {
                         map.selectAll("path").data(states.features)
                         .attr("fill", s => pctDict[d](s.properties[proportionDict[d]]));
                     } else {
                         map.selectAll("path").data(states.features)
                             .attr("fill", s => countDict[d](s.properties[leagueDict[d]]));
+                    }
+
+                    d3.select(`button#${leagueDict[clicked]}`).style("border", '5px solid red').style("font-weight", "bold");
+
+                    for (let l in leagueDict) {
+                        if (l === d) {
+                            d3.select(`button#${leagueDict[l]}`).style("border", '5px solid red').style("font-weight", "bold");
+                        } else {
+                            d3.select(`button#${leagueDict[l]}`).style("border", '2px solid black').style("font-weight", "normal");
+                        }
                     }
                 }
 
