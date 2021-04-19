@@ -13,15 +13,25 @@
     <body>
         <div id="leagues"></div>
         <div id="toggle"></div>
-        <svg id="choropleth" height="610" width="975"></svg>
+        <svg id="choropleth" height="700" width="975"></svg>
         <svg id = "colorScale" height = "100", width = "900"></svg>
         <svg id="graph" height="610" width="975"></svg>
         
         <script>
-            const svg = d3.select("#choropleth");
-            const mapwidth = svg.attr("width");
-            const mapheight = svg.attr("height");
-            const map = svg.append("g");
+            const chorosvg = d3.select("#choropleth");
+            const mapwidth = chorosvg.attr("width");
+            const mapheight = chorosvg.attr("height");
+            const map = chorosvg.append("g");
+
+            const graphsvg = d3.select("#graph");
+            const graphwidth = graphsvg.attr("width");
+            const graphheight = graphsvg.attr("height");
+            const margin = {top: 10, right: 10, bottom: 50, left: 50};
+            const chartWidth = graphwidth - margin.left - margin.right;
+            const chartHeight = graphheight - margin.top - margin.bottom;
+            let annotations = graphsvg.append("g").attr("id","annotations");
+            let graphArea = graphsvg.append("g").attr("id","graphArea")
+                  .attr("transform",`translate(${margin.left},${margin.top})`);
 
             const requestData = async function() {
 
@@ -190,25 +200,26 @@
                 let nhlProportionExtent = d3.extent(nhlProportions);
                 let totalProportionExtent = d3.extent(totalProportions)
                 
-                let totalScale = d3.scaleLinear().domain(totalExtent).range(['lightgrey', 'darkgreen'])
-                let nbaScale = d3.scaleLinear().domain(nbaExtent).range(['lightgrey', 'darkorange'])
+                let totalScale = d3.scaleLinear().domain(totalExtent).range(['lightgrey', 'purple'])
+                let nbaScale = d3.scaleLinear().domain(nbaExtent).range(['lightgrey', '#ee6730'])
                 let mlbScale = d3.scaleLinear().domain(mlbExtent).range(['lightgrey', 'darkred'])
-                let nflScale = d3.scaleLinear().domain(nflExtent).range(['lightgrey', 'brown'])
+                let nflScale = d3.scaleLinear().domain(nflExtent).range(['lightgrey', 'darkgreen'])
                 let nhlScale = d3.scaleLinear().domain(nhlExtent).range(['lightgrey', 'darkblue'])
 
-                let totalProportionScale = d3.scaleLinear().domain(totalProportionExtent).range(['lightgrey', 'darkgreen'])
-                let nbaProportionScale = d3.scaleLinear().domain(nbaProportionExtent).range(['lightgrey', 'darkorange'])
+                let totalProportionScale = d3.scaleLinear().domain(totalProportionExtent).range(['lightgrey', 'purple'])
+                let nbaProportionScale = d3.scaleLinear().domain(nbaProportionExtent).range(['lightgrey', '#ee6730'])
                 let mlbProportionScale = d3.scaleLinear().domain(mlbProportionExtent).range(['lightgrey', 'darkred'])
-                let nflProportionScale = d3.scaleLinear().domain(nflProportionExtent).range(['lightgrey', 'brown'])
+                let nflProportionScale = d3.scaleLinear().domain(nflProportionExtent).range(['lightgrey', 'darkgreen'])
                 let nhlProportionScale = d3.scaleLinear().domain(nhlProportionExtent).range(['lightgrey', 'darkblue'])
 
 
                 // state coloring for total counts -- DO NOT DELETE
                 map.selectAll("path").data(states.features)
                 .join("path")
-                // .attr('class', 'total')
+                .attr('class', 'state')
                 .attr("d", path) 
                 .attr("fill", d => totalScale(d.properties['Total Count']))
+                
 
                 // map.selectAll("path").data(states.features)
                 // .join("path")
@@ -217,10 +228,91 @@
                 // .attr("fill", d => nbaScale(d.properties['NBA']))
 
 
+                // retrace states mesh
                 map.append("path").datum(statesMesh)
                 .attr("class", "outline")
                 .attr("d", path)
 
+
+                //mouseover interactions
+
+                let hoverInfoWidth = 120;
+                let hoverInfoHeight = 40;
+
+                let hoverInfo = map.append("g")
+                     .attr("class","hoverInfo")
+                     .attr("visibility","hidden");
+                hoverInfo.append("rect")
+                    // .attr("class", "hoverInfo")
+                    .attr("fill", "black")
+                    .attr("opacity", 0.9)
+                    .attr("x", -hoverInfoWidth / 2.0)
+                    .attr("y", 0)
+                    .attr("width",hoverInfoWidth)
+                    .attr("height",hoverInfoHeight)
+                    .style("box-shadow", "5px 10px black")
+                let txt = hoverInfo.append("text")
+                    .attr("fill", "white")
+                    .attr("text-anchor","middle")
+                    .attr("alignment-baseline","hanging")
+                    .attr("x", 0)
+                    .attr("y", 2)
+                    .style("padding", "5px");
+                let txt2 = hoverInfo.append("text")
+                     .attr("fill", "white")
+                     .attr("text-anchor","middle")
+                     .attr("alignment-baseline","hanging")
+                     .attr("x", 0)
+                     .attr("y", 22);
+
+                let mouseoverMesh =  map.append("path")
+                     .attr("class","mouseover outline")
+                     .attr("d", "");
+                     
+  
+                d3.selectAll(".state").on("mouseenter", mouseEntersPlot);
+                d3.selectAll(".state").on("mouseout",  mouseLeavesPlot);
+
+                function mouseEntersPlot() {
+                    hoverInfo.style("visibility","visible")
+                
+                    let state = d3.select(this);
+                    let stateID = state.datum().id;
+                    let stateName = state.datum().properties['name']
+                    let targetData = state.datum().properties['Total Count']
+                    
+                    var mo = topojson.mesh(us, us.objects.states, function(a, b) {return a.id === stateID || b.id === stateID;});
+                    mouseoverMesh.datum(mo).attr("d", path)
+                        .attr("class", "hoverMesh")
+
+                
+                    txt.text(stateName);
+                    txt2.text(targetData);
+                
+                    let bounds = path.bounds( state.datum() );
+                    
+                    let xPos = (bounds[0][0]+bounds[1][0])/2.0;
+                    let yPos = bounds[1][1];
+                
+                    hoverInfo.attr("transform",`translate(${xPos},${yPos})`);
+                
+                    // To fix the oscillation mentioned at the end of the video, we add this in the CSS for .mouseover
+                    //  pointer-events: none;
+                
+                }
+                
+                function mouseLeavesPlot() {
+                    hoverInfo.style("visibility","hidden");
+                
+                    let state = d3.select(this);
+                    
+                    mouseoverMesh.attr("d", "");
+                
+                }
+
+
+
+                //button interactivity
                 let pcts = false;
 
                 const logos = ["images/nba.png", "images/mlb.png", "images/nfl.svg", "images/nhl.png", "Total"];
@@ -369,6 +461,50 @@
                     // }
 
                 }
+
+            
+                //GRAPH STARTS HERE:
+                let totalGraphScale = d3.scaleLinear().domain(totalExtent).range([chartHeight, 0])
+                // let nbaGraphScale = d3.scaleLinear().domain(nbaExtent).range([chartHeight, 0])
+                // let mlbGraphScale = d3.scaleLinear().domain(mlbExtent).range([chartHeight, 0])
+                // let nflGraphScale = d3.scaleLinear().domain(nflExtent).range([chartHeight, 0])
+                // let nhlGraphScale = d3.scaleLinear().domain(nhlExtent).range([chartHeight, 0])
+
+                const pctScale = d3.scaleLinear().domain([0,0.01]).range([chartHeight, 0]);
+
+                const leagueScale = d3.scaleBand().domain(leagues).range([0, chartWidth]).padding(0.1);
+
+                let bottomAxis = d3.axisBottom(leagueScale)
+                let bottomAxisG = annotations.append("g")
+                           .attr("class", "x axis")
+                           .attr("transform",`translate(${margin.left},${chartHeight+margin.top+10})`)
+                           .call(bottomAxis);
+
+                function updateBarsAnimated(state, data) {
+
+                    state = state.features.properties
+    
+                    console.log(data)
+                    
+                    const genres = d3.map(data, d => d.genre) 
+                    const genreScale = d3.scaleBand().domain(genres).range([0, chartWidth])
+                                                    .padding(0.05);
+
+                    const leagueColors = d3.scaleOrdinal().domain(leagues).range('#ee6730','darkred', "darkgreen","darkblue")
+                    
+                    bottomAxis.scale(genreScale)
+                    bottomAxisG.transition().call(bottomAxis);
+                    
+                    // chartArea.selectAll('rect.bar').data( data, d => d.genre )
+                    //         .join( update => update.call( update => update.transition()  // Animate resizing and movement
+                    //                                                     .attr("fill", d => leagueColors(state['']))
+                    //                                                     .attr("x", d => genreScale(d.genre))
+                    //                                                     .attr("y", d => percentScale(d.percentpass))
+                    //                                                     .attr("height", d => percentScale(0) - percentScale(d.percentpass))
+                    //                                                     .attr("width", genreScale.bandwidth()) )
+                            // )
+
+                }   
 
                 
             }

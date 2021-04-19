@@ -57,3 +57,18 @@ svg{
     margin: 10px 10px 10px 0px;
 
 }
+
+.hoverInfo rect{
+    padding: 50px;
+    box-shadow: 5px 10px black;
+}
+
+.hoverInfo text{
+    color: blue;
+}
+
+.hoverMesh{
+    stroke: black;
+    stroke-width: 2px;
+    fill: none;
+}
