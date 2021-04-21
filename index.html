@@ -424,9 +424,17 @@
 
                     for (let l in leagueDict) {
                         if (l === d) {
-                            d3.select(`button#${leagueDict[l]}`).style("border", '5px solid red').style("font-weight", "bold");
+                            if (l === 'Total') {
+                                d3.select(`button#${l}`).style("border", '5px solid red').style("font-weight", "bold");
+                            } else {
+                                d3.select(`button#${leagueDict[l]}`).style("border", '5px solid red').style("font-weight", "bold");
+                            }
                         } else {
-                            d3.select(`button#${leagueDict[l]}`).style("border", '2px solid black').style("font-weight", "normal");
+                            if (l === 'Total') {
+                                d3.select(`button#${l}`).style("border", '2px solid black').style("font-weight", "normal");
+                            } else {
+                                d3.select(`button#${leagueDict[l]}`).style("border", '2px solid black').style("font-weight", "normal");
+                            }  
                         }
                     }
                 }
