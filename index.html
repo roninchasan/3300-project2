@@ -6,6 +6,7 @@
         <link rel="stylesheet" href="style.css">
 
         <script src="https://d3js.org/d3.v6.min.js"></script>
+        <!-- <script src="https://d3js.org/d3.v6.min.js"></script> -->
         <script src="https://d3js.org/topojson.v3.min.js"></script>
         
     </head>
@@ -14,7 +15,7 @@
         <div id="leagues"></div>
         <div id="toggle"></div>
         <svg id="choropleth" height="700" width="975"></svg>
-        <svg id = "colorScale" height = "100", width = "900"></svg>
+        <svg id = "colorScale" height = "100" width = "900"></svg>
         <svg id="graph" height="610" width="975"></svg>
         
         <script>
@@ -22,11 +23,6 @@
             const mapwidth = chorosvg.attr("width");
             const mapheight = chorosvg.attr("height");
             const map = chorosvg.append("g");
-
-            const colorsvg = d3.select("#colorScale");
-            const scaleWidth = colorsvg.attr("width");
-            const scaleHeight = colorsvg.attr("height");
-            const colorScale = colorsvg.append("g");
 
 
             const graphsvg = d3.select("#graph");
@@ -407,7 +403,41 @@
                         d3.select("button#pctButton").transition(100).style("background-color", 'lightgrey').style("font-weight", "bold")
                     });
 
-                
+                legend = d3.select("svg#colorScale");
+
+                drawLegend(totalScale);
+
+                function drawLegend(scale) {
+
+                    const legendWidth = legend.attr("width");
+                    const legendHeight = legend.attr("height");
+                    const legendMinMax = d3.extent(scale.domain());
+                    const barHeight = 50;
+                    const stepSize = 10;
+                    const pixelScale = d3.scaleLinear().domain([0,legendWidth-40]).range([legendMinMax[0],legendMinMax[1]]);
+                    const barScale = d3.scaleLinear().domain([legendMinMax[0],legendMinMax[1]]).range([0,legendWidth-40]);
+                    const barAxis = d3.axisBottom(barScale);
+
+                    console.log(legendMinMax);
+                    legend.select(".colorbar").remove();
+
+                    legend.append("g")
+							.attr("class", "colorbar axis")
+							.attr("transform","translate("+(20)+","+(barHeight+15)+")")
+							.call(barAxis);
+						
+                    let bar = legend.append("g").attr("transform","translate("+(20)+","+(10)+")")
+                    
+                    for (let i=0; i<legendWidth-40; i=i+stepSize) {
+                        bar.append("rect")
+                            .attr("x", i)
+                            .attr("y", 0)
+                            .attr("width", stepSize)
+                            .attr("height",barHeight)
+                            .style("fill", scale( pixelScale(i) ));
+                    }
+                }
+
 
                 function updateMap(d) {
 
@@ -420,10 +450,12 @@
                     
                     if (pcts) {
                         map.selectAll("path").data(states.features)
-                        .attr("fill", s => pctDict[d](s.properties[proportionDict[d]]));
+                            .attr("fill", s => pctDict[d](s.properties[proportionDict[d]]));
+                        drawLegend(pctDict[d]);
                     } else {
                         map.selectAll("path").data(states.features)
                             .attr("fill", s => countDict[d](s.properties[leagueDict[d]]));
+                        drawLegend(countDict[d]);
                     }
 
                     d3.select(`button#${leagueDict[clicked]}`).style("border", '5px solid red').style("font-weight", "bold");
