@@ -23,6 +23,12 @@
             const mapheight = chorosvg.attr("height");
             const map = chorosvg.append("g");
 
+            const colorsvg = d3.select("#colorScale");
+            const scaleWidth = colorsvg.attr("width");
+            const scaleHeight = colorsvg.attr("height");
+            const colorScale = colorsvg.append("g");
+
+
             const graphsvg = d3.select("#graph");
             const graphwidth = graphsvg.attr("width");
             const graphheight = graphsvg.attr("height");
@@ -438,6 +444,20 @@
                         }
                     }
                 }
+
+                // cScale = d3.scaleSequential(d3.interpolatePiYG).domain([0, 200])
+
+                // var interpolate = d3.interpolate("lightgrey", "purple");
+
+                // colorScale.append("rect")
+                //     .attr("x", 0)
+                //     .attr("y", 0)
+                //     .attr("height", scaleHeight)
+                //     .attr("width", "")
+
+
+
+
 
             
                 //GRAPH STARTS HERE:
