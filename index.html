@@ -316,7 +316,7 @@
                 const logos = ["images/nba.png", "images/mlb.png", "images/nfl.svg", "images/nhl.png", "Total"];
                 const leagueDict = {"images/nba.png": 'NBA', "images/mlb.png": 'MLB', "images/nfl.svg": 'NFL', "images/nhl.png": 'NHL', "Total": 'Total Count'};
                 const proportionDict = {"images/nba.png": 'NBA Proportion', "images/mlb.png": 'MLB Proportion', "images/nfl.svg": 'NFL Proportion', "images/nhl.png": 'NHL Proportion', "Total": 'Total Proportion'};
-                let currentLeague = "Total";
+                // let currentLeague = "Total";
                 logos.forEach( d => {
                     if (d !== 'Total') {
                         if (d === 'images/nba.png' ) {
@@ -328,7 +328,7 @@
                                 .attr("height", "50")
                                 .on("click", function(){
                                     updateMap(d);
-                                    currentLeague = "NBA";
+                                    // currentLeague = "NBA";
                                 })
                             .append("img")
                                 .attr("src", d)
@@ -347,7 +347,7 @@
                             .attr("height", "50")
                             .on("click", function(){
                                 updateMap(d);
-                                currentLeague = leagueDict[d];
+                                // currentLeague = leagueDict[d];
                             })
                             .append("img")
                             .attr("src", d)
@@ -368,7 +368,7 @@
                         .attr("height", "30")
                         .on("click", function(){
                             updateMap(d);
-                            currentLeague = "Total";
+                            // currentLeague = "Total";
                             // clickedState="Total"
                         });
                     }
