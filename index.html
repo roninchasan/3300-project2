@@ -14,7 +14,7 @@
     <body>
         <div id="leagues"></div>
         <div id="toggle"></div>
-        <svg id="choropleth" height="700" width="975"></svg>
+        <svg id="choropleth" height="670" width="975"></svg>
         <svg id = "colorScale" height = "100" width = "900"></svg>
         <h2 id="graphHeader">National Pro Athlete Counts</h2>
         <svg id="graph" height="610" width="975"></svg>
@@ -530,6 +530,7 @@
                 const nflTotal = getSum(nfl)
                 const nhlTotal = getSum(nhl)
                 let totals = [nbaTotal, mlbTotal, nflTotal, nhlTotal]
+                const totalsMap = {"NBA": nbaTotal, "MLB": mlbTotal, "NFL": nflTotal, "NHL": nhlTotal}
 
                 let nationTotalExtent = d3.extent(totals)
                 let nationTotalScale = d3.scaleLinear().domain([0, 1.1*nationTotalExtent[1]]).range([chartHeight, 0])
@@ -593,10 +594,26 @@
                         .attr("height", d => (nationTotalScale(0) - nationTotalScale(d['count'])))
                         .attr("width", "100px" )
 
+                
+
+
                 d3.selectAll(".state").on("click",  updateGraph);
 
                 let clickedState="Total";
                 function updateGraph(){
+                    const mouseover = annotations.append("g").attr("class","mouseover")
+                       .attr("transform",`translate(${margin.left+15},${margin.top+15})`);
+
+                    const frame = mouseover.append("rect").attr("class","frame")
+                        // we style this in <head>
+                        .attr("x", 0).attr("y", 0)
+                        .attr("rx", 5).attr("ry", 5)  // rx and ry round corners
+                        .attr("height", 130);  // set width later
+                    const textbox = mouseover.append("g").attr("transform","translate(10,10)");
+                    const format = d3.format(',d');
+
+
+
                     clickedState = d3.select(this);
 
                     let stateID = clickedState.datum().id;
@@ -630,12 +647,21 @@
                     let pctExtent = d3.extent(pctsArray);
                     let updatedPctScale = d3.scaleLinear().domain([0, (1.1*pctExtent[1])]).range([chartHeight, 0]);
 
-                    graphArea.selectAll('rect.bar').data(graphData)
+                    let bars = graphArea.selectAll('rect.bar').data(graphData)
                     .join('rect').attr("class", "bar")
+                        .on("mouseover", function(d) {
+                            updateMouseover(d, clickedState, textbox)
+                            mouseover.attr("visibility","")})
+                        .on("mouseout", function() {
+                            mouseover.attr("visibility","hidden");
+                        })
                         .transition(1000)
                         .attr("y", d => (updatedScale(d['count'])))
                         .attr("height", d => (updatedScale(0) - updatedScale(d['count'])))
-                    
+
+                    // bars
+                        
+
                     leftAxis = d3.axisLeft(updatedScale); //.tickFormat(d3.format('.0%'));
                     leftAxisG.transition().call(leftAxis)
 
@@ -652,6 +678,35 @@
 
                     d3.select("h2#graphHeader").text(stateName)
                 }
+
+                function updateMouseover(d, state, textbox) {
+                    d = d.toElement.__data__
+                    console.log(d)
+                    hoverPct = state.datum().properties[`${d['league']} Proportion`]
+                    pctOfLeague = 100 * d['count'] / totalsMap[d['league']]
+                
+                    textbox.html('');  // shorthand to empty out an element
+                    
+                    let hoveredLeague = `League: ${d['league']}`;
+                    let countText = `Number of players: ${d['count']}`;
+                    let pctText = `Percent of population as pros: ${hoverPct.toFixed(8)}%`;
+                    let pctLeagueText = `Percent of ${d['league']} Americans from this state: ${pctOfLeague.toFixed(4)}%`;
+
+                    
+                    // let maxWidth = Math.max( stringLen(stateName), stringLen(result), stringLen(diff), stringLen(evote), stringLen(pop), stringLen(ppv) )
+                    // frame.attr("width", maxWidth+20);
+                    
+                    textbox.append("text").text(hoveredLeague)
+                        .attr("x", 0).attr("y", 10);
+                    textbox.append("text").text(countText)
+                        .attr("x", 0).attr("y", 30);
+                    textbox.append("text").text(pctText)
+                        .attr("x", 0).attr("y", 50);
+                    textbox.append("text").text(pctLeagueText)
+                        .attr("x", 0).attr("y", 70);
+                
+                }                
+    
                 
             }
             requestData();

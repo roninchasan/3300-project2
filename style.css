@@ -16,7 +16,11 @@ svg{
     display: block;
     background: none;
     /* position:static; */
-    margin: 1em auto 2em auto;
+    margin: 0 auto 1em auto;
+}
+
+#choropleth{
+    margin-bottom: 0;
 }
 
 #leagues {
