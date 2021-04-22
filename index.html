@@ -29,7 +29,7 @@
             const graphsvg = d3.select("#graph");
             const graphSVGWidth = graphsvg.attr("width");
             const graphSVGHeight = graphsvg.attr("height");
-            const margin = {top: 10, right: 10, bottom: 50, left: 50};
+            const margin = {top: 10, right: 60, bottom: 50, left: 50};
             const chartWidth = graphSVGWidth - margin.left - margin.right;
             const chartHeight = graphSVGHeight - margin.top - margin.bottom;
             let annotations = graphsvg.append("g").attr("id","annotations");
@@ -421,7 +421,7 @@
                         
                         pcts = false;
                         updateMap(clicked);
-                        toggleGraph()
+                        // toggleGraph()
                     });
 
                 d3.select("div#toggle")
@@ -437,7 +437,7 @@
                         
                         pcts = true;
                         updateMap(clicked);
-                        toggleGraph()
+                        // toggleGraph()
                     });
 
                 legend = d3.select("svg#colorScale");
@@ -538,6 +538,21 @@
                 {"league": 'MLB', "count": mlbTotal},
                 {"league": 'NFL', "count": nflTotal},
                 {"league": 'NHL', "count": nhlTotal}]
+
+                const usPop = 328239523;
+
+                nbaPct = nbaTotal/usPop;
+                mlbPct = mlbTotal/usPop;
+                nflPct = nflTotal/usPop;
+                nhlPct = nhlTotal/usPop;
+
+                let nationPCTExtent = d3.extent([nbaPct, mlbPct, nflPct, nhlPct])
+                let nationPCTScale = d3.scaleLinear().domain([0, 1.1*nationPCTExtent[1]]).range([chartHeight, 0])
+
+                graphPCTData = [{"league": 'NBA', "count": nbaPct},
+                {"league": 'MLB', "count": mlbPct},
+                {"league": 'NFL', "count": nflPct},
+                {"league": 'NHL', "count": nhlPct}]
             
                 let bottomAxis = d3.axisBottom(leagueScale)
                 annotations.append("g")
@@ -545,22 +560,29 @@
                            .attr("transform",`translate(${margin.left},${chartHeight+margin.top})`)
                            .call(bottomAxis);
 
-                let leftAxis = d3.axisLeft(nationTotalScale); //.tickFormat(d3.format('.0%'));
+                let leftAxis = d3.axisLeft(nationTotalScale)//.ticks(5).tickFormat(d3.format('.0%'));
                 let leftAxisG = annotations.append("g")
                             .attr("class", "y axis")
                             .attr("transform",`translate(${margin.left},${margin.top})`)
                             .call(leftAxis)
 
                 let leftGridlines = d3.axisLeft(nationTotalScale)
-                                        .tickSize(-chartWidth-10)
+                                        .tickSize(-chartWidth)
                                         .tickFormat("")
+                                        // .ticks(5)
 
                 let leftGridlinesG = annotations.append("g")
                             .attr("class", "gridlines")
                             .attr("transform",`translate(${margin.left},${margin.top})`)
                             .call(leftGridlines);
 
-                graphArea.attr("transform", 'translate(115, 10)')
+                let rightAxis = d3.axisRight(nationPCTScale).tickFormat(d3.format('%')) //.ticks(5);
+                let rightAxisG = annotations.append("g")
+                            .attr("class", "y axis")
+                            .attr("transform",`translate(${margin.left+chartWidth},${margin.top})`)
+                            .call(rightAxis)
+
+                graphArea.attr("transform", 'translate(109, 10)')
 
                 graphArea.selectAll('rect.bar').data(graphData)
                     .join('rect').attr("class", "bar")
@@ -573,55 +595,40 @@
 
                 d3.selectAll(".state").on("click",  updateGraph);
 
-
                 let clickedState="Total";
                 function updateGraph(){
-
                     clickedState = d3.select(this);
 
                     let stateID = clickedState.datum().id;
                     let stateName = clickedState.datum().properties['name']
-                    // let targetData = clickedState.datum().properties['Total Count']
 
                     const leagueColors = d3.scaleOrdinal().domain(leagues).range('#ee6730','darkred', "darkgreen","darkblue")
 
                     let selectedData = {}
                     let dataArray = []
 
-                    if (!pcts){
-                        selectedData = {
-                            "NBA":clickedState.datum().properties['NBA'],
-                            "MLB":clickedState.datum().properties['MLB'],
-                            "NFL":clickedState.datum().properties['NFL'],
-                            "NHL":clickedState.datum().properties['NHL']
-                        }
-                        dataArray = [clickedState.datum().properties['NBA'], clickedState.datum().properties['MLB'],
-                        clickedState.datum().properties['NFL'], clickedState.datum().properties['NHL']]
-
-                        graphData = [{"league": 'NBA', "count": selectedData["NBA"]},
-                        {"league": 'MLB', "count": selectedData["MLB"]},
-                        {"league": 'NFL', "count": selectedData["NFL"]},
-                        {"league": 'NHL', "count": selectedData["NHL"]}]
-
-                    } else {
-                        selectedData = {
-                            "NBA":clickedState.datum().properties['NBA Proportion'],
-                            "MLB":clickedState.datum().properties['MLB Proportion'],
-                            "NFL":clickedState.datum().properties['NFL Proportion'],
-                            "NHL":clickedState.datum().properties['NHL Proportion']
-                        }
-                        dataArray = [clickedState.datum().properties['NBA Proportion'], clickedState.datum().properties['MLB Proportion'],
-                        clickedState.datum().properties['NFL Proportion'], clickedState.datum().properties['NHL Proportion']]
-
-                        graphData = [{"league": 'NBA', "count": selectedData["NBA"]},
-                        {"league": 'MLB', "count": selectedData["MLB"]},
-                        {"league": 'NFL', "count": selectedData["NFL"]},
-                        {"league": 'NHL', "count": selectedData["NHL"]}]
-
+                    selectedData = {
+                        "NBA":clickedState.datum().properties['NBA'],
+                        "MLB":clickedState.datum().properties['MLB'],
+                        "NFL":clickedState.datum().properties['NFL'],
+                        "NHL":clickedState.datum().properties['NHL']
                     }
+                    dataArray = [clickedState.datum().properties['NBA'], clickedState.datum().properties['MLB'],
+                    clickedState.datum().properties['NFL'], clickedState.datum().properties['NHL']]
+
+                    graphData = [{"league": 'NBA', "count": selectedData["NBA"]},
+                    {"league": 'MLB', "count": selectedData["MLB"]},
+                    {"league": 'NFL', "count": selectedData["NFL"]},
+                    {"league": 'NHL', "count": selectedData["NHL"]}]
+
+                    pctsArray = [clickedState.datum().properties['NBA Proportion'], clickedState.datum().properties['MLB Proportion'],
+                    clickedState.datum().properties['NFL Proportion'], clickedState.datum().properties['NHL Proportion']]
 
                     let graphExtent = d3.extent(dataArray);
                     let updatedScale = d3.scaleLinear().domain([0, (1.1*graphExtent[1])]).range([chartHeight, 0]);
+                    
+                    let pctExtent = d3.extent(pctsArray);
+                    let updatedPctScale = d3.scaleLinear().domain([0, (1.1*pctExtent[1])]).range([chartHeight, 0]);
 
                     graphArea.selectAll('rect.bar').data(graphData)
                     .join('rect').attr("class", "bar")
@@ -632,8 +639,11 @@
                     leftAxis = d3.axisLeft(updatedScale); //.tickFormat(d3.format('.0%'));
                     leftAxisG.transition().call(leftAxis)
 
+                    rightAxis = d3.axisRight(updatedPctScale);
+                    rightAxisG.transition().call(rightAxis)
+
                     leftGridlines = d3.axisLeft(updatedScale)
-                                        .tickSize(-chartWidth-10)
+                                        .tickSize(-chartWidth)
                                         .tickFormat("")
 
                     leftGridlinesG.transition().call(leftGridlines);
@@ -641,137 +651,6 @@
                     let selectedScale = true;
 
                     d3.select("h2#graphHeader").text(stateName)
-                }
-
-                function toggleGraph(){
-                    if (clickedState==="Total"){
-                        toggleNationGraph();
-                        return;
-                    }
-
-                    let stateID = clickedState.datum().id;
-                    let stateName = clickedState.datum().properties['name']
-                    const leagueColors = d3.scaleOrdinal().domain(leagues).range('#ee6730','darkred', "darkgreen","darkblue")
-
-                    // let graphExtentToggle = [];
-
-                    let selectedDataToggle = {}
-                    let dataArrayToggle = []
-
-                    if (!pcts){
-                        selectedDataToggle = {
-                            "NBA":clickedState.datum().properties['NBA'],
-                            "MLB":clickedState.datum().properties['MLB'],
-                            "NFL":clickedState.datum().properties['NFL'],
-                            "NHL":clickedState.datum().properties['NHL']
-                        }
-                        dataArrayToggle = [clickedState.datum().properties['NBA'], clickedState.datum().properties['MLB'],
-                        clickedState.datum().properties['NFL'], clickedState.datum().properties['NHL']]
-
-                        graphData = [{"league": 'NBA', "count": selectedDataToggle["NBA"]},
-                        {"league": 'MLB', "count": selectedDataToggle["MLB"]},
-                        {"league": 'NFL', "count": selectedDataToggle["NFL"]},
-                        {"league": 'NHL', "count": selectedDataToggle["NHL"]}]
-
-                        // graphExtentToggle = d3.extent(dataArrayToggle);
-
-
-                    } else {
-                        selectedDataToggle = {
-                            "NBA":clickedState.datum().properties['NBA Proportion'],
-                            "MLB":clickedState.datum().properties['MLB Proportion'],
-                            "NFL":clickedState.datum().properties['NFL Proportion'],
-                            "NHL":clickedState.datum().properties['NHL Proportion']
-                        }
-                        dataArrayToggle = [clickedState.datum().properties['NBA Proportion'], clickedState.datum().properties['MLB Proportion'],
-                        clickedState.datum().properties['NFL Proportion'], clickedState.datum().properties['NHL Proportion']]
-
-                        graphData = [{"league": 'NBA', "count": selectedDataToggle["NBA"]},
-                        {"league": 'MLB', "count": selectedDataToggle["MLB"]},
-                        {"league": 'NFL', "count": selectedDataToggle["NFL"]},
-                        {"league": 'NHL', "count": selectedDataToggle["NHL"]}]
-
-
-                    }
-
-                    let graphExtentToggle = d3.extent(dataArrayToggle);
-                    let updatedScale = d3.scaleLinear().domain([0, (1.1*graphExtentToggle[1])]).range([chartHeight, 0]);
-
-                    graphArea.selectAll('rect.bar').data(graphData)
-                    .join('rect').attr("class", "bar")
-                        .transition(1000)
-                        .attr("y", d => (updatedScale(d['count'])))
-                        .attr("height", d => (updatedScale(0) - updatedScale(d['count'])))
-                    
-                    leftAxis = d3.axisLeft(updatedScale); //.tickFormat(d3.format('.0%'));
-                    leftAxisG.transition().call(leftAxis)
-
-                    leftGridlines = d3.axisLeft(updatedScale)
-                                        .tickSize(-chartWidth-10)
-                                        .tickFormat("")
-
-                    leftGridlinesG.call(leftGridlines);
-
-                    d3.select("h2#graphHeader").text(stateName)
-                }
-
-                const usPop = 328239523;
-
-                function toggleNationGraph(){
-                    const leagueColors = d3.scaleOrdinal().domain(leagues).range('#ee6730','darkred', "darkgreen","darkblue")
-
-                    // let graphExtentToggle = [];
-
-                    let selectedDataToggle = {}
-                    let dataArrayToggle = []
-
-                    let nationExtent = null;
-                    let nationScale = null;
-
-                    if (!pcts){
-                        nationExtent = d3.extent(totals)
-                        nationScale = d3.scaleLinear().domain([0, 1.1*nationExtent[1]]).range([chartHeight, 0])
-
-                        graphData = [{"league": 'NBA', "count": nbaTotal},
-                        {"league": 'MLB', "count": mlbTotal},
-                        {"league": 'NFL', "count": nflTotal},
-                        {"league": 'NHL', "count": nhlTotal}]
-
-                        // graphExtentToggle = d3.extent(dataArrayToggle);
-
-
-                    } else {
-                        nbaPct = nbaTotal/usPop;
-                        mlbPct = mlbTotal/usPop;
-                        nflPct = nflTotal/usPop;
-                        nhlPct = nhlTotal/usPop;
-
-                        nationExtent = d3.extent([nbaPct, mlbPct, nflPct, nhlPct])
-                        nationScale = d3.scaleLinear().domain([0, 1.1*nationExtent[1]]).range([chartHeight, 0])
-
-                        graphData = [{"league": 'NBA', "count": nbaPct},
-                        {"league": 'MLB', "count": mlbPct},
-                        {"league": 'NFL', "count": nflPct},
-                        {"league": 'NHL', "count": nhlPct}]
-
-                    }
-
-                    graphArea.selectAll('rect.bar').data(graphData)
-                    .join('rect').attr("class", "bar")
-                        .transition(1000)
-                        .attr("y", d => (nationScale(d['count'])))
-                        .attr("height", d => (nationScale(0) - nationScale(d['count'])))
-                    
-                    leftAxis = d3.axisLeft(nationScale); //.tickFormat(d3.format('.0%'));
-                    leftAxisG.transition().call(leftAxis)
-
-                    leftGridlines = d3.axisLeft(nationScale)
-                                        .tickSize(-chartWidth-10)
-                                        .tickFormat("")
-
-                    leftGridlinesG.call(leftGridlines);
-
-                    d3.select("h2#graphHeader").text("National Athletes")
                 }
                 
             }
