@@ -72,3 +72,13 @@ svg{
     stroke-width: 2px;
     fill: none;
 }
+
+.gridlines{
+    color: lightgrey;
+    opacity: 0.5;
+}
+
+#graphHeader{
+    width: 100%;
+    text-align: center;
+}
