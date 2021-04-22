@@ -229,13 +229,13 @@
                 //mouseover interactions
 
                 let hoverInfoWidth = 150;
-                let hoverInfoHeight = 40;
+                let hoverInfoHeight = 70;
 
                 let hoverInfo = map.append("g")
                      .attr("class","hoverInfo")
                      .attr("visibility","hidden");
                 hoverInfo.append("rect")
-                    // .attr("class", "hoverInfo")
+                    .attr("class", "hoverInfo")
                     .attr("fill", "black")
                     .attr("opacity", 0.9)
                     .attr("x", -hoverInfoWidth / 2.0)
@@ -256,6 +256,12 @@
                      .attr("alignment-baseline","hanging")
                      .attr("x", 0)
                      .attr("y", 22);
+                let txt3 = hoverInfo.append("text")
+                     .attr("fill", "white")
+                     .attr("text-anchor","middle")
+                     .attr("alignment-baseline","hanging")
+                     .attr("x", 0)
+                     .attr("y", 42);
 
                 let mouseoverMesh =  map.append("path")
                      .attr("class","mouseover outline")
@@ -272,12 +278,40 @@
                     let stateID = state.datum().id;
                     let stateName = state.datum().properties['name']
                     let targetData = state.datum().properties[leagueDict[clicked]]
+                    // console.log(leagueDict[clicked]);
+                    // console.log(totals);
+                    const counter = (accumulator, currentValue) => accumulator + currentValue;
+
+                    total = totals.reduce(counter);
+
+                    var total_dict = {};
+
+                    for (var i=0; i<leagues.length;i++) {
+                        total_dict[leagues[i]] = totals[i];
+                    }
+                    total_dict['Total Count'] = total;
+
+                    console.log(total_dict);
+
+                    let leaguePercent;
+
+                    
 
                     if (pcts) {
+                        d3.select("rect.hoverInfo").attr("height",40);
                         targetData = state.datum().properties[proportionDict[clicked]]
                         targetData = targetData.toFixed(5);
                         targetData = `${targetData}%`
+                    } else {
+                        hoverInfoHeight = 70;
+                        d3.select("rect.hoverInfo").attr("height",70);
+                        leaguePercent = targetData / total_dict[leagueDict[clicked]];
+                        leaguePercent = leaguePercent * 100;
+                        leaguePercent = leaguePercent.toFixed(5);
+                        leaguePercent = `${leaguePercent}%`
                     }
+
+                    console.log(leaguePercent);
 
                     var mo = topojson.mesh(us, us.objects.states, function(a, b) {return a.id === stateID || b.id === stateID;});
                     mouseoverMesh.datum(mo).attr("d", path)
@@ -285,6 +319,7 @@
                 
                     txt.text(stateName);
                     txt2.text(targetData);
+                    txt3.text(leaguePercent);
                 
                     let bounds = path.bounds( state.datum() );
                     
@@ -328,7 +363,6 @@
                                 .attr("height", "50")
                                 .on("click", function(){
                                     updateMap(d);
-                                    // currentLeague = "NBA";
                                 })
                             .append("img")
                                 .attr("src", d)
@@ -347,7 +381,6 @@
                             .attr("height", "50")
                             .on("click", function(){
                                 updateMap(d);
-                                // currentLeague = leagueDict[d];
                             })
                             .append("img")
                             .attr("src", d)
@@ -368,8 +401,6 @@
                         .attr("height", "30")
                         .on("click", function(){
                             updateMap(d);
-                            // currentLeague = "Total";
-                            // clickedState="Total"
                         });
                     }
                     
