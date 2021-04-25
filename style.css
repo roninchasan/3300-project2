@@ -1,5 +1,27 @@
 body{
-    
+    font-family: 'Trebuchet MS', 'Tahoma', 'Verdana', Arial, sans-serif;
+}
+
+#sidebar{
+    height: 100%; 
+    width: 250px; 
+    position: fixed; 
+    z-index: 1;
+    top: 0;
+    left: 0;
+    background-color: navy;
+    overflow-x: hidden;
+    padding-top: 20px;
+    justify-content: center; 
+}
+
+.sideHead{
+    color: white;
+    margin: 0 20px 0 20px;
+}
+
+#main{
+    margin-left: 250px;
 }
 
 .nation {
@@ -24,10 +46,12 @@ svg{
 }
 
 #leagues {
-    margin: 0 auto 0 auto;
+    margin: 0 auto 2em auto;
     display: flex;
     flex-direction: row;
-    width: auto;
+    width: 250px;
+    flex-wrap: wrap;
+    justify-content: center;
 }
 
 .league {
@@ -40,7 +64,9 @@ svg{
 }
 
 #toggle{
-
+    display: flex;
+    justify-content: center;
+    /* margin-top: 10px; */
 }
 
 .toggleButton{
@@ -49,6 +75,7 @@ svg{
     background-color: white;
     border: 2px solid black;
 }
+
 #countButton{
     background-color: lightgrey;
     font-weight: bold;
@@ -86,3 +113,4 @@ svg{
     width: 100%;
     text-align: center;
 }
+

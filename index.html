@@ -12,12 +12,19 @@
     </head>
 
     <body>
-        <div id="leagues"></div>
-        <div id="toggle"></div>
-        <svg id="choropleth" height="670" width="975"></svg>
-        <svg id = "colorScale" height = "100" width = "900"></svg>
-        <h2 id="graphHeader">National Pro Athlete Counts</h2>
-        <svg id="graph" height="610" width="975"></svg>
+        <div id="sidebar">
+            <h3 class='sideHead'>Select a league to filter the map by:</h3>
+            <div id="leagues"></div>
+            <h3 class='sideHead'>Display setting:</h3>
+            <div id="toggle"></div>
+            <p class="sideHead"><em>"Counts" displays the total number of (league filtered) athletes by state, while "Percentages" shows the percent of this state's population is a (league filtered) athlete.</em></p>
+        </div>
+        <div id="main">
+            <svg id="choropleth" height="670" width="975"></svg>
+            <svg id = "colorScale" height = "100" width = "900"></svg>
+            <h2 id="graphHeader">National Pro Athlete Counts</h2>
+            <svg id="graph" height="610" width="975"></svg>
+        </div>
         
         <script>
             const chorosvg = d3.select("#choropleth");
@@ -421,7 +428,6 @@
                         
                         pcts = false;
                         updateMap(clicked);
-                        // toggleGraph()
                     });
 
                 d3.select("div#toggle")
@@ -437,7 +443,6 @@
                         
                         pcts = true;
                         updateMap(clicked);
-                        // toggleGraph()
                     });
 
                 legend = d3.select("svg#colorScale");
@@ -460,7 +465,7 @@
 
                     legend.append("g")
 							.attr("class", "colorbar axis")
-							.attr("transform","translate("+(20)+","+(barHeight+15)+")")
+							.attr("transform","translate("+(20)+","+(barHeight+7)+")")
 							.call(barAxis);
 						
                     let bar = legend.append("g").attr("transform","translate("+(20)+","+(10)+")")
@@ -593,9 +598,14 @@
                         .attr("y", d => (nationTotalScale(d['count'])))
                         .attr("height", d => (nationTotalScale(0) - nationTotalScale(d['count'])))
                         .attr("width", "100px" )
+                        .on("mouseover", function() {
+                            d3.select(this).attr("stroke-width", 3).attr("stroke", "black")
+                        })
+                        .on("mouseout", function() {
+                            d3.select(this).attr("stroke", "none")
+                        })
 
                 
-
 
                 d3.selectAll(".state").on("click",  updateGraph);
 
@@ -605,14 +615,11 @@
                        .attr("transform",`translate(${margin.left+15},${margin.top+15})`);
 
                     const frame = mouseover.append("rect").attr("class","frame")
-                        // we style this in <head>
                         .attr("x", 0).attr("y", 0)
-                        .attr("rx", 5).attr("ry", 5)  // rx and ry round corners
-                        .attr("height", 130);  // set width later
+                        .attr("rx", 5).attr("ry", 5) 
+                        .attr("height", 130);
                     const textbox = mouseover.append("g").attr("transform","translate(10,10)");
                     const format = d3.format(',d');
-
-
 
                     clickedState = d3.select(this);
 
@@ -650,9 +657,11 @@
                     let bars = graphArea.selectAll('rect.bar').data(graphData)
                     .join('rect').attr("class", "bar")
                         .on("mouseover", function(d) {
+                            d3.select(this).attr("stroke-width", 3).attr("stroke", "black")
                             updateMouseover(d, clickedState, textbox)
                             mouseover.attr("visibility","")})
                         .on("mouseout", function() {
+                            d3.select(this).attr("stroke", "none").attr("stroke-width", 1)
                             mouseover.attr("visibility","hidden");
                         })
                         .transition(1000)
