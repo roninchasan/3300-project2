@@ -34,6 +34,10 @@ body{
     fill: none;
 }
 
+.state{
+    cursor: pointer;
+}
+
 svg{
     display: block;
     background: none;
@@ -61,6 +65,16 @@ svg{
     background-color: white;
     border: 2px solid black;
     border-radius: 5px;
+    cursor: pointer;
+}
+
+.selected {
+    width: 100px;
+    height: 50px;
+    margin: 10px;
+    background-color: darkgrey;
+    border: 2px solid darkred;
+    border-radius: 5px;
 }
 
 #toggle{
@@ -74,7 +88,10 @@ svg{
     height: 50px;
     background-color: white;
     border: 2px solid black;
+    cursor: pointer;
 }
+
+button:focus {outline:0;}
 
 #countButton{
     background-color: lightgrey;
@@ -100,6 +117,12 @@ svg{
 
 .hoverMesh{
     stroke: black;
+    stroke-width: 2px;
+    fill: none;
+}
+
+.clickMesh{
+    stroke: grey;
     stroke-width: 2px;
     fill: none;
 }

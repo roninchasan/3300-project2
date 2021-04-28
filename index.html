@@ -273,6 +273,10 @@
                 let mouseoverMesh =  map.append("path")
                      .attr("class","mouseover outline")
                      .attr("d", "");
+
+                let clickMesh =  map.append("path")
+                     .attr("class","click outline")
+                     .attr("d", "");
                      
   
                 d3.selectAll(".state").on("mouseenter", mouseEntersPlot);
@@ -402,7 +406,7 @@
                     } else {
                         d3.select("div#leagues")
                         .append("button")
-                        .attr("class", "league")
+                        .attr("class", "selected")
                         .attr("id", "Total")
                         .text( d )
                         .style("font-size", "1.7em")
@@ -562,20 +566,21 @@
                         drawLegend(countDict[d]);
                     }
 
-                    d3.select(`button#${leagueDict[clicked]}`).style("border", '5px solid red').style("font-weight", "bold");
+                    d3.select(`button#${leagueDict[clicked]}`).attr("class", 'selected').style("font-weight", "bold");
 
                     for (let l in leagueDict) {
                         if (l === d) {
                             if (l === 'Total') {
-                                d3.select(`button#${l}`).style("border", '5px solid red').style("font-weight", "bold");
+                                d3.select(`button#${l}`).attr("class", 'selected').style("font-weight", "bold");
                             } else {
-                                d3.select(`button#${leagueDict[l]}`).style("border", '5px solid red').style("font-weight", "bold");
+                                d3.select(`button#${leagueDict[l]}`).attr("class", 'selected').style("font-weight", "bold");
+
                             }
                         } else {
                             if (l === 'Total') {
-                                d3.select(`button#${l}`).style("border", '2px solid black').style("font-weight", "normal");
+                                d3.select(`button#${l}`).attr("class", 'league').style("font-weight", "normal");
                             } else {
-                                d3.select(`button#${leagueDict[l]}`).style("border", '2px solid black').style("font-weight", "normal");
+                                d3.select(`button#${leagueDict[l]}`).attr("class", 'league').style("font-weight", "normal");
                             }  
                         }
                     }
@@ -674,6 +679,10 @@
 
                 let clickedState="Total";
                 function updateGraph(){
+                    if (clickedState !== "Total"){
+                        clickMesh.attr("d", "");
+                    }
+
                     const mouseover = annotations.append("g").attr("class","mouseover")
                        .attr("transform",`translate(${margin.left+15},${margin.top+15})`);
 
@@ -688,6 +697,10 @@
 
                     let stateID = clickedState.datum().id;
                     let stateName = clickedState.datum().properties['name']
+
+                    var mo = topojson.mesh(us, us.objects.states, function(a, b) {return a.id === stateID || b.id === stateID;});
+                    clickMesh.datum(mo).attr("d", path)
+                        .attr("class", "clickMesh")
 
                     const leagueColors = d3.scaleOrdinal().domain(leagues).range('#ee6730','darkred', "darkgreen","darkblue")
 
