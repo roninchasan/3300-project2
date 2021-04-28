@@ -107,7 +107,6 @@
                 .attr("class", "outline")
                 .attr("d", path)
 
-
                 function mapStates(league) {
                     var states = league.map(row => row["State"]);
                     // console.log(states);
@@ -224,6 +223,7 @@
                 map.selectAll("path").data(states.features)
                 .join("path")
                 .attr('class', 'state')
+                .attr("state", d => d.properties.name)
                 .attr("d", path) 
                 .attr("fill", d => totalScale(d.properties['Total Count']))
             
@@ -298,7 +298,7 @@
                     }
                     total_dict['Total Count'] = total;
 
-                    console.log(total_dict);
+                    // console.log(total_dict);
 
                     let leaguePercent;
 
@@ -318,7 +318,7 @@
                         leaguePercent = `${leaguePercent}%`
                     }
 
-                    console.log(leaguePercent);
+                    // console.log(leaguePercent);
 
                     var mo = topojson.mesh(us, us.objects.states, function(a, b) {return a.id === stateID || b.id === stateID;});
                     mouseoverMesh.datum(mo).attr("d", path)
@@ -358,6 +358,8 @@
                 const logos = ["images/nba.png", "images/mlb.png", "images/nfl.svg", "images/nhl.png", "Total"];
                 const leagueDict = {"images/nba.png": 'NBA', "images/mlb.png": 'MLB', "images/nfl.svg": 'NFL', "images/nhl.png": 'NHL', "Total": 'Total Count'};
                 const proportionDict = {"images/nba.png": 'NBA Proportion', "images/mlb.png": 'MLB Proportion', "images/nfl.svg": 'NFL Proportion', "images/nhl.png": 'NHL Proportion', "Total": 'Total Proportion'};
+                const pctDict = {"images/nba.png": nbaProportionScale, "images/mlb.png": mlbProportionScale, "images/nfl.svg": nflProportionScale, "images/nhl.png": nhlProportionScale, "Total": totalProportionScale};
+                const countDict = {"images/nba.png": nbaScale, "images/mlb.png": mlbScale, "images/nfl.svg": nflScale, "images/nhl.png": nhlScale, "Total": totalScale};
                 // let currentLeague = "Total";
                 logos.forEach( d => {
                     if (d !== 'Total') {
@@ -449,6 +451,69 @@
 
                 drawLegend(totalScale);
 
+                // BRUSH
+
+                var filterFunc = d => true;
+
+                function pointPassesFilters(point) {
+                    let stillPassed = true;
+                    // console.log(filterFunc(point));
+                    stillPassed = filterFunc(point) && stillPassed;
+                    // if (stillPassed) {
+                    //     console.log(point);
+                    // }
+                    return stillPassed;
+                }
+
+                function brushMap() {
+                    let feats = [];
+                    states.features.forEach(state => {
+                        if (pointPassesFilters(state.properties['Total Count'])) {
+                            console.log(state, state.properties['Total Count']);
+                            feats.push(state);
+                            let name = state.properties['name']
+                            console.log(map.select(`[state=${name}]`));
+                            map.select(`[state=${name}]`).attr("fill", "black");
+                        }
+                    });
+                }
+
+                // brushMap();
+
+                var brush = d3.brushX().extent([[0,10],[legend.attr("width"), 60]])
+                                .on("brush end", brushMoved);
+
+                function brushMoved(event) {
+                    // console.log(clicked, pcts);
+                    let scale;
+                    if (pcts) {
+                        scale = pctDict[clicked];
+                    }  else {
+                        scale = countDict[clicked];
+                    }
+                    scale = totalExtent;
+                    // console.log(event);
+
+                    if (event.selection !== null) {
+                        // console.log(scale.invert(20));
+                        // console.log(totalExtent);
+                        let start = (event.selection[0] - 20) / 1.76229508197;
+                        let end = (event.selection[1] - 20) / 1.76229508197;
+
+                        // console.log(start, end);
+                        
+                        filterFunc = d => d >= start && d <= end;
+
+                        brushMap();
+                        
+                    } else {
+                        let filterFunc = d => true;
+                        brushMap();
+                    }
+                }
+
+                legend.append("g").attr("class","brush").call(brush);
+
                 function drawLegend(scale) {
 
                     const legendWidth = legend.attr("width");
@@ -460,7 +525,7 @@
                     const barScale = d3.scaleLinear().domain([legendMinMax[0],legendMinMax[1]]).range([0,legendWidth-40]);
                     const barAxis = d3.axisBottom(barScale);
 
-                    console.log(legendMinMax);
+                    // console.log(legendMinMax);
                     legend.select(".colorbar").remove();
 
                     legend.append("g")
@@ -484,8 +549,8 @@
                 function updateMap(d) {
                     clicked = d;
 
-                    const pctDict = {"images/nba.png": nbaProportionScale, "images/mlb.png": mlbProportionScale, "images/nfl.svg": nflProportionScale, "images/nhl.png": nhlProportionScale, "Total": totalProportionScale};
-                    const countDict = {"images/nba.png": nbaScale, "images/mlb.png": mlbScale, "images/nfl.svg": nflScale, "images/nhl.png": nhlScale, "Total": totalScale};
+                    // const pctDict = {"images/nba.png": nbaProportionScale, "images/mlb.png": mlbProportionScale, "images/nfl.svg": nflProportionScale, "images/nhl.png": nhlProportionScale, "Total": totalProportionScale};
+                    // const countDict = {"images/nba.png": nbaScale, "images/mlb.png": mlbScale, "images/nfl.svg": nflScale, "images/nhl.png": nhlScale, "Total": totalScale};
 
                     // proportionDict = {"images/nba.png": 'NBA Proportion', "images/mlb.png": 'MLB Proportion', "images/nfl.svg": 'NFL Proportion', "images/nhl.png": 'NHL Proportion', "Total": 'Total Proportion'};
                     
