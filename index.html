@@ -466,13 +466,11 @@
                 }
 
                 function brushMap() {
-                    let feats = [];
                     states.features.forEach(state => {
                         if (pointPassesFilters(state.properties['Total Count'])) {
-                            console.log(state, state.properties['Total Count']);
-                            feats.push(state);
+                            // console.log(state, state.properties['Total Count']);
                             let name = state.properties['name']
-                            console.log(map.select(`[state=${name}]`));
+                            // console.log(map.select(`[state=${name}]`));
                             map.select(`[state=${name}]`).attr("fill", "black");
                         }
                     });
