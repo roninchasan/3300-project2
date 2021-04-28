@@ -223,7 +223,7 @@
                 map.selectAll("path").data(states.features)
                 .join("path")
                 .attr('class', 'state')
-                .attr("state", d => d.properties.name)
+                .attr("state", d => d.properties.name.replace(" ", ""))
                 .attr("d", path) 
                 .attr("fill", d => totalScale(d.properties['Total Count']))
             
@@ -364,6 +364,9 @@
                 const proportionDict = {"images/nba.png": 'NBA Proportion', "images/mlb.png": 'MLB Proportion', "images/nfl.svg": 'NFL Proportion', "images/nhl.png": 'NHL Proportion', "Total": 'Total Proportion'};
                 const pctDict = {"images/nba.png": nbaProportionScale, "images/mlb.png": mlbProportionScale, "images/nfl.svg": nflProportionScale, "images/nhl.png": nhlProportionScale, "Total": totalProportionScale};
                 const countDict = {"images/nba.png": nbaScale, "images/mlb.png": mlbScale, "images/nfl.svg": nflScale, "images/nhl.png": nhlScale, "Total": totalScale};
+
+                const pctExtents = {"images/nba.png": nbaProportionExtent, "images/mlb.png": mlbProportionExtent, "images/nfl.svg": nflProportionExtent, "images/nhl.png": nhlProportionExtent, "Total": totalProportionExtent};
+                const countExtents = {"images/nba.png": nbaExtent, "images/mlb.png": mlbExtent, "images/nfl.svg": nflExtent, "images/nhl.png": nhlExtent, "Total": totalExtent};
                 // let currentLeague = "Total";
                 logos.forEach( d => {
                     if (d !== 'Total') {
@@ -470,12 +473,31 @@
                 }
 
                 function brushMap() {
+
+                    // let prop;
+                    // if (pcts) {
+                    //     map.selectAll("path").data(states.features)
+                    //             .attr("fill", s => pctDict[clicked](s.properties[proportionDict[clicked]]));
+                    //     prop = state.properties[proportionDict[clicked]];
+                    // } else {
+                    //     map.selectAll("path").data(states.features)
+                    //             .attr("fill", s => countDict[clicked](s.properties[leagueDict[clicked]]));
+                    //     prop = state.properties[leagueDict[clicked]];
+                    // }
+                    
                     states.features.forEach(state => {
-                        if (pointPassesFilters(state.properties['Total Count'])) {
-                            // console.log(state, state.properties['Total Count']);
-                            let name = state.properties['name']
-                            // console.log(map.select(`[state=${name}]`));
-                            map.select(`[state=${name}]`).attr("fill", "black");
+                        let prop;
+                        if (pcts) {
+                            prop = state.properties[proportionDict[clicked]];
+                        } else {
+                            prop = state.properties[leagueDict[clicked]];
+                        }
+                        let name = state.properties['name'].replaceAll(" ", "");
+                        if (pointPassesFilters(prop)) {
+                            map.select(`[state=${name}]`).attr("opacity", "1");
+                        } else {
+                            map.select(`[state=${name}]`).attr("opacity", ".5");
+                            // map.select(`[state=${name}]`).attr("fill", s => pctDict[clicked](s.properties[proportionDict[clicked]]));
                         }
                     });
                 }
@@ -486,35 +508,39 @@
                                 .on("brush end", brushMoved);
 
                 function brushMoved(event) {
-                    // console.log(clicked, pcts);
                     let scale;
                     if (pcts) {
-                        scale = pctDict[clicked];
+                        scale = pctExtents[clicked];
                     }  else {
-                        scale = countDict[clicked];
+                        scale = countExtents[clicked];
                     }
-                    scale = totalExtent;
-                    // console.log(event);
 
                     if (event.selection !== null) {
-                        // console.log(scale.invert(20));
-                        // console.log(totalExtent);
-                        let start = (event.selection[0] - 20) / 1.76229508197;
-                        let end = (event.selection[1] - 20) / 1.76229508197;
+                        let denom = 870 / scale[1];
+                        let start = (event.selection[0] - 20) / denom;
+                        let end = (event.selection[1] - 20) / denom;
 
-                        // console.log(start, end);
+                        console.log(start, end);
                         
                         filterFunc = d => d >= start && d <= end;
 
+                        // updateMap(clicked);
                         brushMap();
+                        
                         
                     } else {
                         let filterFunc = d => true;
+                        // updateMap(clicked);
                         brushMap();
                     }
                 }
 
                 legend.append("g").attr("class","brush").call(brush);
+
+                // var brush = d3.brushX().extent([[0,10],[legend.attr("width"), 60]])
+                //                 .on("brush end", brushMoved);
+
+                // var brush;
 
                 function drawLegend(scale) {
 
@@ -532,10 +558,10 @@
 
                     legend.append("g")
 							.attr("class", "colorbar axis")
-							.attr("transform","translate("+(20)+","+(barHeight+7)+")")
+							.attr("transform","translate("+(20)+","+(barHeight+10)+")")
 							.call(barAxis);
 						
-                    let bar = legend.append("g").attr("transform","translate("+(20)+","+(10)+")")
+                    let bar = legend.append("g").attr("transform","translate("+(20)+","+(10)+")").lower();
                     
                     for (let i=0; i<legendWidth-40; i=i+stepSize) {
                         bar.append("rect")
@@ -545,7 +571,16 @@
                             .attr("height",barHeight)
                             .style("fill", scale( pixelScale(i) ));
                     }
+
+                    // var brush = d3.brushX().extent([[0,10],[legend.attr("width"), 60]])
+                    //             .on("brush end", brushMoved);
+
+                    // legend.append("g").attr("class","brush").call(brush);
+                    
                 }
+
+                
+                // legend.append("g").attr("class","brush").raise().call(brush);
 
 
                 function updateMap(d) {
@@ -560,10 +595,12 @@
                         map.selectAll("path").data(states.features)
                             .attr("fill", s => pctDict[d](s.properties[proportionDict[d]]));
                         drawLegend(pctDict[d]);
+                        brushMap();
                     } else {
                         map.selectAll("path").data(states.features)
                             .attr("fill", s => countDict[d](s.properties[leagueDict[d]]));
                         drawLegend(countDict[d]);
+                        brushMap();
                     }
 
                     d3.select(`button#${leagueDict[clicked]}`).attr("class", 'selected').style("font-weight", "bold");
