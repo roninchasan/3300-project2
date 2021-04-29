@@ -505,7 +505,7 @@
 
                 // brushMap();
 
-                var brush = d3.brushX().extent([[0,10],[legend.attr("width"), 60]])
+                var brush = d3.brushX().extent([[0,10],[legend.attr("width")-40, 60]])
                                 .on("brush end", brushMoved);
 
                 function brushMoved(event) {
@@ -518,8 +518,8 @@
 
                     if (event.selection !== null) {
                         let denom = 870 / scale[1];
-                        let start = (event.selection[0] - 20) / denom;
-                        let end = (event.selection[1] - 20) / denom;
+                        let start = (event.selection[0]) / denom;
+                        let end = (event.selection[1]) / denom;
 
                         console.log(start, end);
                         
@@ -536,7 +536,7 @@
                     }
                 }
 
-                legend.append("g").attr("class","brush").call(brush);
+                legend.append("g").attr("class","brush").attr("transform", "translate(20, 0)").call(brush);
 
                 // var brush = d3.brushX().extent([[0,10],[legend.attr("width"), 60]])
                 //                 .on("brush end", brushMoved);
@@ -544,6 +544,8 @@
                 // var brush;
 
                 function drawLegend(scale) {
+
+                    console.log(scale.range())
 
                     const legendWidth = legend.attr("width");
                     const legendHeight = legend.attr("height");
@@ -555,14 +557,14 @@
                     const barAxis = d3.axisBottom(barScale);
 
                     // console.log(legendMinMax);
-                    legend.select(".colorbar").remove();
+                    legend.selectAll(".colorbar").remove();
 
                     legend.append("g")
 							.attr("class", "colorbar axis")
 							.attr("transform","translate("+(20)+","+(barHeight+10)+")")
 							.call(barAxis);
 						
-                    let bar = legend.append("g").attr("transform","translate("+(20)+","+(10)+")").lower();
+                    let bar = legend.append("g").attr("class","colorbar").attr("transform","translate("+(20)+","+(10)+")").lower();
                     
                     for (let i=0; i<legendWidth-40; i=i+stepSize) {
                         bar.append("rect")
@@ -600,6 +602,9 @@
                     } else {
                         map.selectAll("path").data(states.features)
                             .attr("fill", s => countDict[d](s.properties[leagueDict[d]]));
+                        console.log(countDict[d])
+                        console.log(d)
+
                         drawLegend(countDict[d]);
                         brushMap();
                     }
