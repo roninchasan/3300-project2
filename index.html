@@ -21,6 +21,7 @@
             <div id="resetGraph"></div>
         </div>
         <div id="main">
+            <h1 style="text-align: center;">Where are professional athletes from in the US?</h1>
             <svg id="choropleth" height="670" width="975"></svg>
             <svg id = "colorScale" height = "100" width = "900"></svg>
             <h2 id="graphHeader">National Pro Athlete Counts</h2>
@@ -278,6 +279,10 @@
                 let clickMesh =  map.append("path")
                      .attr("class","click outline")
                      .attr("d", "");
+
+                let brushMesh =  map.append("path")
+                     .attr("class","brush outline")
+                     .attr("d", "");
                      
   
                 d3.selectAll(".state").on("mouseenter", mouseEntersPlot);
@@ -473,19 +478,11 @@
                     return stillPassed;
                 }
 
-                function brushMap() {
+                // var names = [];
 
-                    // let prop;
-                    // if (pcts) {
-                    //     map.selectAll("path").data(states.features)
-                    //             .attr("fill", s => pctDict[clicked](s.properties[proportionDict[clicked]]));
-                    //     prop = state.properties[proportionDict[clicked]];
-                    // } else {
-                    //     map.selectAll("path").data(states.features)
-                    //             .attr("fill", s => countDict[clicked](s.properties[leagueDict[clicked]]));
-                    //     prop = state.properties[leagueDict[clicked]];
-                    // }
-                    
+                function brushMap() {
+                    var ids = [];
+
                     states.features.forEach(state => {
                         let prop;
                         if (pcts) {
@@ -493,14 +490,24 @@
                         } else {
                             prop = state.properties[leagueDict[clicked]];
                         }
-                        let name = state.properties['name'].replaceAll(" ", "");
+                        let id = state['id'];
+
+                        // brushMesh.attr("d", "");
+                        
                         if (pointPassesFilters(prop)) {
-                            map.select(`[state=${name}]`).attr("opacity", "1");
-                        } else {
-                            map.select(`[state=${name}]`).attr("opacity", ".5");
-                            // map.select(`[state=${name}]`).attr("fill", s => pctDict[clicked](s.properties[proportionDict[clicked]]));
+                            ids.push(id);
+                            // map.select(`[state=${name}]`).attr("opacity", "1");
                         }
+                        // else {
+
+                        // }
+                        
                     });
+
+                    var mo = topojson.mesh(us, us.objects.states, function(a, b) {return ids.includes(a.id) || ids.includes(b.id);});
+                    // console.log(mo);
+                    brushMesh.datum(mo).attr("d", path)
+                        .attr("class", "brushMesh");
                 }
 
                 // brushMap();
@@ -517,11 +524,11 @@
                     }
 
                     if (event.selection !== null) {
-                        let denom = 870 / scale[1];
+                        let denom = 860 / scale[1];
                         let start = (event.selection[0]) / denom;
                         let end = (event.selection[1]) / denom;
 
-                        console.log(start, end);
+                        // console.log(start, end);
                         
                         filterFunc = d => d >= start && d <= end;
 
@@ -598,6 +605,7 @@
                         map.selectAll("path").data(states.features)
                             .attr("fill", s => pctDict[d](s.properties[proportionDict[d]]));
                         drawLegend(pctDict[d]);
+                        console.log(d);
                         brushMap();
                     } else {
                         map.selectAll("path").data(states.features)
@@ -606,6 +614,7 @@
                         console.log(d)
 
                         drawLegend(countDict[d]);
+                        console.log(d);
                         brushMap();
                     }
 
