@@ -20,6 +20,12 @@ body{
     margin: 0 20px 0 20px;
 }
 
+.sideP{
+    color: white;
+    margin: 0 20px 0 20px;
+    font-size: 0.8em;
+}
+
 #main{
     margin-left: 250px;
 }
@@ -49,7 +55,15 @@ svg{
     margin-bottom: 0;
 }
 
-#leagues {
+#resetGraph {
+    width: 250px;
+    display: flex;
+    justify-content: center;
+    position: absolute;
+    bottom: 1.5em;
+}
+
+#leagues{
     margin: 0 auto 2em auto;
     display: flex;
     flex-direction: row;
@@ -66,6 +80,10 @@ svg{
     border: 2px solid black;
     border-radius: 5px;
     cursor: pointer;
+}
+
+.league:hover{
+    background-color: lightgrey;
 }
 
 .selected {
@@ -90,12 +108,19 @@ svg{
     border: 2px solid black;
     cursor: pointer;
 }
+.toggleButton:hover{
+    background-color: lightgrey;
+}
+
+.selectedToggle{
+    background-color: darkgrey !important;
+    cursor: default;
+    font-weight: bold;
+}
 
 button:focus {outline:0;}
 
 #countButton{
-    background-color: lightgrey;
-    font-weight: bold;
     border-radius: 10px 0 0 10px;
     margin: 10px 0 10px 10px;
 }
@@ -105,6 +130,11 @@ button:focus {outline:0;}
     margin: 10px 10px 10px 0px;
 }
 
+#resetButton{
+    height: 40px;
+    width: 100px;
+
+}
 
 .hoverInfo rect{
     padding: 50px;

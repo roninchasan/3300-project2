@@ -17,7 +17,8 @@
             <div id="leagues"></div>
             <h3 class='sideHead'>Display setting:</h3>
             <div id="toggle"></div>
-            <p class="sideHead"><em>"Counts" displays the total number of (league filtered) athletes by state, while "Percentages" shows the percent of this state's population is a (league filtered) athlete.</em></p>
+            <p class="sideP"><em>"Counts" displays the total number of (league filtered) athletes by state, while "Percentages" shows what percent of this state's population is a (league filtered) athlete.</em></p>
+            <div id="resetGraph"></div>
         </div>
         <div id="main">
             <svg id="choropleth" height="670" width="975"></svg>
@@ -426,14 +427,14 @@
 
                 d3.select("div#toggle")
                     .append("button")
-                    .attr('class', 'toggleButton')
+                    .attr('class', 'toggleButton selectedToggle')
                     .attr('id', 'countButton')
                     .text("Counts")
                     .attr("width", "30")
                     .attr("height", "30")
                     .on("click", function(){
-                        d3.select("button#countButton").transition(100).style("background-color", 'lightgrey').style("font-weight", "bold")
-                        d3.select("button#pctButton").transition(100).style("background-color", 'white').style("font-weight", "normal").style("color", "black")
+                        d3.select("button#countButton").transition(100).attr("class", "toggleButton selectedToggle")
+                        d3.select("button#pctButton").transition(100).attr("class", "toggleButton")
                         
                         pcts = false;
                         updateMap(clicked);
@@ -447,8 +448,8 @@
                     .attr("width", "30")
                     .attr("height", "30")
                     .on("click", function(){
-                        d3.select("button#countButton").transition(100).style("background-color", 'white').style("font-weight", "normal")
-                        d3.select("button#pctButton").transition(100).style("background-color", 'lightgrey').style("font-weight", "bold")
+                        d3.select("button#countButton").transition(100).attr("class", "toggleButton")
+                        d3.select("button#pctButton").transition(100).attr("class", "toggleButton selectedToggle")
                         
                         pcts = true;
                         updateMap(clicked);
@@ -645,7 +646,7 @@
                 let nationTotalExtent = d3.extent(totals)
                 let nationTotalScale = d3.scaleLinear().domain([0, 1.1*nationTotalExtent[1]]).range([chartHeight, 0])
 
-                let graphData = [{"league": 'NBA', "count": nbaTotal},
+                let nationGraphData = [{"league": 'NBA', "count": nbaTotal},
                 {"league": 'MLB', "count": mlbTotal},
                 {"league": 'NFL', "count": nflTotal},
                 {"league": 'NHL', "count": nhlTotal}]
@@ -695,7 +696,7 @@
 
                 graphArea.attr("transform", 'translate(109, 10)')
 
-                graphArea.selectAll('rect.bar').data(graphData)
+                graphArea.selectAll('rect.bar').data(nationGraphData)
                     .join('rect').attr("class", "bar")
                         .attr("id", d => d['league'])
                         .attr("fill", d => leagueColors(d['league']))
@@ -753,7 +754,7 @@
                     dataArray = [clickedState.datum().properties['NBA'], clickedState.datum().properties['MLB'],
                     clickedState.datum().properties['NFL'], clickedState.datum().properties['NHL']]
 
-                    graphData = [{"league": 'NBA', "count": selectedData["NBA"]},
+                    var graphData = [{"league": 'NBA', "count": selectedData["NBA"]},
                     {"league": 'MLB', "count": selectedData["MLB"]},
                     {"league": 'NFL', "count": selectedData["NFL"]},
                     {"league": 'NHL', "count": selectedData["NHL"]}]
@@ -827,7 +828,38 @@
                     textbox.append("text").text(pctLeagueText)
                         .attr("x", 0).attr("y", 70);
                 
-                }                
+                }
+
+                function resetGraph(){
+                    //remove state mesh
+                    clickMesh.attr("d", "");
+                        // textbox.html('');
+
+                    //reset bars to national data
+                    let bars = graphArea.selectAll('rect.bar').data(nationGraphData)
+                    .join('rect').attr("class", "bar")
+                        .transition(1000)
+                        .attr("y", d => (nationTotalScale(d['count'])))
+                        .attr("height", d => (nationTotalScale(0) - nationTotalScale(d['count'])))
+
+                    //reset scales
+                    leftAxis = d3.axisLeft(nationTotalScale); 
+                    leftAxisG.transition().call(leftAxis)
+
+                    rightAxis = d3.axisRight(nationPCTScale);
+                    rightAxisG.transition().call(rightAxis)
+
+                    //reset header text
+                    d3.select("h2#graphHeader").text("National Pro Athlete Counts")
+
+                    
+                }
+                
+                d3.select("div#resetGraph").append("button")
+                    .text("Reset Graph")
+                    .attr("id", "resetButton")
+                    .attr("class", "league")
+                    .on("click", resetGraph)
     
                 
             }
