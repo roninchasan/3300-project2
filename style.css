@@ -1,6 +1,8 @@
 body{
     font-family: 'Trebuchet MS', 'Tahoma', 'Verdana', Arial, sans-serif;
-    background-color: skyblue;
+    background: rgb(58,166,255);
+    background: linear-gradient(54deg, rgba(58,166,255,1) 20%, rgba(41,108,255,1) 61%, rgba(1,225,241,1) 100%);
+
 }
 
 #sidebar{
@@ -23,8 +25,26 @@ body{
 
 .sideP{
     color: white;
-    margin: 0 20px 0 20px;
+    margin: 0 20px 1.5em 20px;
     font-size: 0.8em;
+}
+
+#guide{
+    margin: .5em 10% .5em 10%;
+    width: 80%;
+    height: 100px;
+    background-color: rgb(19, 19, 19);
+    color: white;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.guideText{
+    width: 100%;
+    text-align: center;
+    margin: 5px 0 5px 0;
 }
 
 #main{
@@ -65,7 +85,7 @@ svg{
 }
 
 #leagues{
-    margin: 0 auto 2em auto;
+    margin: 0 auto 8px auto;
     display: flex;
     flex-direction: row;
     width: 250px;
@@ -76,7 +96,7 @@ svg{
 .league {
     width: 100px;
     height: 50px;
-    margin: 10px;
+    margin: 8px;
     background-color: white;
     border: 2px solid black;
     border-radius: 5px;
@@ -86,6 +106,8 @@ svg{
 .league:hover{
     background-color: lightgrey;
 }
+
+
 
 .selected {
     width: 100px;
@@ -136,10 +158,15 @@ button:focus {outline:0;}
     width: 100px;
 
 }
+#resetButton:active{
+    background-color: darkred;
+    color: white;
+}
 
-.hoverInfo rect{
+.hoverInfo{
     padding: 50px;
     box-shadow: 5px 10px black;
+    border-radius: 20px;
 }
 
 .hoverInfo text{
@@ -154,13 +181,13 @@ button:focus {outline:0;}
 
 .clickMesh{
     stroke: grey;
-    stroke-width: 2px;
+    stroke-width: 3.5px;
     fill: none;
 }
 
 .brushMesh{
     stroke: darkgreen;
-    stroke-width: 2px;
+    stroke-width: 1.5px;
     fill: none;
 }
 
@@ -173,5 +200,6 @@ button:focus {outline:0;}
     width: 100%;
     text-align: center;
 }
+
 
 

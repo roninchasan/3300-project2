@@ -18,6 +18,8 @@
             <h3 class='sideHead'>Display setting:</h3>
             <div id="toggle"></div>
             <p class="sideP"><em>"Counts" displays the total number of (league filtered) athletes by state, while "Percentages" shows what percent of this state's population is a (league filtered) athlete.</em></p>
+            <h3 class='sideHead'>Hover Info Guide:</h3>
+            <div id="guide"></div>
             <div id="resetGraph"></div>
         </div>
         <div id="main">
@@ -241,7 +243,7 @@
                 let hoverInfoHeight = 70;
 
                 let hoverInfo = map.append("g")
-                     .attr("class","hoverInfo")
+                     .attr("class","hoverInfoG")
                      .attr("visibility","hidden");
                 hoverInfo.append("rect")
                     .attr("class", "hoverInfo")
@@ -252,6 +254,7 @@
                     .attr("width",hoverInfoWidth)
                     .attr("height",hoverInfoHeight)
                     .style("box-shadow", "5px 10px black")
+                    .attr("border-radius", "1.5em")
                 let txt = hoverInfo.append("text")
                     .attr("fill", "white")
                     .attr("text-anchor","middle")
@@ -283,6 +286,9 @@
                 let brushMesh =  map.append("path")
                      .attr("class","brush outline")
                      .attr("d", "");
+
+                
+                hoverInfo.raise();
                      
   
                 d3.selectAll(".state").on("mouseenter", mouseEntersPlot);
@@ -423,6 +429,7 @@
                         .attr("height", "30")
                         .on("click", function(){
                             updateMap(d);
+                            updateGuide();
                         });
                     }
                     
@@ -443,6 +450,7 @@
                         
                         pcts = false;
                         updateMap(clicked);
+                        updateGuide();
                     });
 
                 d3.select("div#toggle")
@@ -458,6 +466,7 @@
                         
                         pcts = true;
                         updateMap(clicked);
+                        updateGuide();
                     });
 
                 legend = d3.select("svg#colorScale");
@@ -508,6 +517,8 @@
                     // console.log(mo);
                     brushMesh.datum(mo).attr("d", path)
                         .attr("class", "brushMesh");
+
+                    d3.select("g.mouseover").raise();
                 }
 
                 // brushMap();
@@ -595,6 +606,10 @@
 
                 function updateMap(d) {
                     clicked = d;
+
+                    
+                    brushMesh.attr("d", "");
+
 
                     // const pctDict = {"images/nba.png": nbaProportionScale, "images/mlb.png": mlbProportionScale, "images/nfl.svg": nflProportionScale, "images/nhl.png": nhlProportionScale, "Total": totalProportionScale};
                     // const countDict = {"images/nba.png": nbaScale, "images/mlb.png": mlbScale, "images/nfl.svg": nflScale, "images/nhl.png": nhlScale, "Total": totalScale};
@@ -729,21 +744,27 @@
 
                 d3.selectAll(".state").on("click",  updateGraph);
 
+                const mouseover = annotations.append("g").attr("class","mouseover")
+                       .attr("transform",`translate(${margin.left+15},${margin.top+15})`)
+                       .raise();
+
+                    const frame = mouseover.append("rect").attr("class","frame")
+                        .attr("x", 0).attr("y", 0)
+                        .attr("height", 93)
+                        .attr("width", 382)
+                        .attr("fill", "rgba(219, 234, 255, 0.9)")
+                        .attr("stroke", "navy")
+                        .raise();
+                    const textbox = mouseover.append("g").attr("transform","translate(10,10)").raise();
+                    const format = d3.format(',d');
+
+                mouseover.attr("visibility", "hidden");
+
                 let clickedState="Total";
                 function updateGraph(){
                     if (clickedState !== "Total"){
                         clickMesh.attr("d", "");
                     }
-
-                    const mouseover = annotations.append("g").attr("class","mouseover")
-                       .attr("transform",`translate(${margin.left+15},${margin.top+15})`);
-
-                    const frame = mouseover.append("rect").attr("class","frame")
-                        .attr("x", 0).attr("y", 0)
-                        .attr("rx", 5).attr("ry", 5) 
-                        .attr("height", 130);
-                    const textbox = mouseover.append("g").attr("transform","translate(10,10)");
-                    const format = d3.format(',d');
 
                     clickedState = d3.select(this);
 
@@ -848,6 +869,8 @@
                     //remove state mesh
                     clickMesh.attr("d", "");
                         // textbox.html('');
+                    brushMesh.attr("d", "");
+
 
                     //reset bars to national data
                     let bars = graphArea.selectAll('rect.bar').data(nationGraphData)
@@ -866,14 +889,50 @@
                     //reset header text
                     d3.select("h2#graphHeader").text("National Pro Athlete Counts")
 
-                    
                 }
-                
+
+                //reset button
                 d3.select("div#resetGraph").append("button")
                     .text("Reset Graph")
                     .attr("id", "resetButton")
                     .attr("class", "league")
-                    .on("click", resetGraph)
+                    .on("click", resetGraph);
+
+
+                //sidebar hover guide
+                let guide = d3.select("div#guide")
+                
+                let guide1 = guide.append("text")
+                    .attr("class", "guideText")
+                    .attr("id", "guide1")
+                    .text("State")
+
+                let guide2 = guide.append("text")
+                    .attr("class", "guideText")
+                    .attr("id", "guide2")
+                    .text("Number of athletes")
+                
+                let guide3 = guide.append("text")
+                    .attr("class", "guideText")                    
+                    .attr("id", "guide3")
+                    .text("% of athletes from here");
+
+                function updateGuide(){
+                    console.log("test!")
+                    if (pcts){
+                        guide2.text("% of population that are filtered athletes");
+                        guide3.text("");
+                    } else {
+                        guide2.text("Number of athletes");
+                        if (clickedState !== "Totals"){
+                            guide3.text("% of league from here");
+                        } else{
+                            guide3.text("% of athletes from here");
+                        }
+                    }
+                }
+
+
     
                 
             }
