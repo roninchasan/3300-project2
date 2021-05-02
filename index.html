@@ -4,11 +4,8 @@
         <title>INFO 3300 - Project 2 (rcc263, jmw555)</title>
         
         <link rel="stylesheet" href="style.css">
-
         <script src="https://d3js.org/d3.v6.min.js"></script>
-        <!-- <script src="https://d3js.org/d3.v6.min.js"></script> -->
         <script src="https://d3js.org/topojson.v3.min.js"></script>
-        
     </head>
 
     <body>
@@ -22,6 +19,7 @@
             <div id="guide"></div>
             <div id="resetGraph"></div>
         </div>
+
         <div id="main">
             <h1 style="text-align: center;">Where are professional athletes from in the US?</h1>
             <svg id="choropleth" height="670" width="975"></svg>
@@ -56,8 +54,7 @@
 
                 const population = await d3.csv("/datasets/population.csv");
 
-
-                //data filtering & manipulation here
+                //data filtering & manipulation
                 population.forEach( (d) => {
                     d['2019 Population'] = Number(d['2019 Population']);
                 });
@@ -89,7 +86,6 @@
                         d['State'] = "District of Columbia"
                     }
                     d['Count'] = Number(d['Count']);
-
                 })
 
                 //choropleth setup
@@ -113,7 +109,6 @@
 
                 function mapStates(league) {
                     var states = league.map(row => row["State"]);
-                    // console.log(states);
                     var league_obj = {};
 
                     states.forEach(state => {
@@ -123,7 +118,6 @@
                             league_obj[state] = 1;
                         }
                     });
-                    // console.log(league_obj);
 
                     var league = [];
 
@@ -159,8 +153,6 @@
                         state.properties[league] = 0;
                     }
                     totalCounts.push(state.properties["Total Count"])
-
-                    
                 }
 
                 datasets = [nba, mlb, nfl, nhl]
@@ -188,16 +180,9 @@
                     mlbProportions.push(100 * state.properties["MLB"]/state.properties["Population"])
                     nflProportions.push(100 * state.properties["NFL"]/state.properties["Population"])
                     nhlProportions.push(100 * state.properties["NHL"]/state.properties["Population"])
-
-
-
                 });
-                console.log("States:", states);
-                // console.log("NBA", nba);
-                // console.log("NFL", nfl);
-                // console.log("NBA", nba);
-                // console.log("NBA", nba);
                 
+                // extents and color scales for map
                 nbaExtent = d3.extent(nba, d => d['Count']);
                 mlbExtent = d3.extent(mlb, d => d['Count']);
                 nflExtent = d3.extent(nfl, d => d['Count']);
@@ -223,7 +208,7 @@
                 let nhlProportionScale = d3.scaleLinear().domain(nhlProportionExtent).range(['lightgrey', 'darkblue'])
 
 
-                // state coloring for total counts -- DO NOT DELETE
+                // state coloring for total counts (default)
                 map.selectAll("path").data(states.features)
                 .join("path")
                 .attr('class', 'state')
@@ -237,14 +222,15 @@
                 .attr("d", path)
 
 
-                //mouseover interactions
-
+                // map mouseover interactions
                 let hoverInfoWidth = 150;
                 let hoverInfoHeight = 70;
 
                 let hoverInfo = map.append("g")
                      .attr("class","hoverInfoG")
                      .attr("visibility","hidden");
+
+                //background
                 hoverInfo.append("rect")
                     .attr("class", "hoverInfo")
                     .attr("fill", "black")
@@ -255,6 +241,8 @@
                     .attr("height",hoverInfoHeight)
                     .style("box-shadow", "5px 10px black")
                     .attr("border-radius", "1.5em")
+
+                //text line 1
                 let txt = hoverInfo.append("text")
                     .attr("fill", "white")
                     .attr("text-anchor","middle")
@@ -262,12 +250,16 @@
                     .attr("x", 0)
                     .attr("y", 2)
                     .style("padding", "5px");
+
+                //text line 2
                 let txt2 = hoverInfo.append("text")
                      .attr("fill", "white")
                      .attr("text-anchor","middle")
                      .attr("alignment-baseline","hanging")
                      .attr("x", 0)
                      .attr("y", 22);
+
+                //text line 3
                 let txt3 = hoverInfo.append("text")
                      .attr("fill", "white")
                      .attr("text-anchor","middle")
@@ -275,10 +267,12 @@
                      .attr("x", 0)
                      .attr("y", 42);
 
+                //mesh for state hovers
                 let mouseoverMesh =  map.append("path")
                      .attr("class","mouseover outline")
                      .attr("d", "");
 
+                //mesh for state clicks
                 let clickMesh =  map.append("path")
                      .attr("class","click outline")
                      .attr("d", "");
@@ -287,10 +281,10 @@
                      .attr("class","brush outline")
                      .attr("d", "");
 
-                
+                //raise hover info above all existing map elements
                 hoverInfo.raise();
                      
-  
+                //configure hovers
                 d3.selectAll(".state").on("mouseenter", mouseEntersPlot);
                 d3.selectAll(".state").on("mouseout",  mouseLeavesPlot);
 
@@ -301,12 +295,9 @@
                     let stateID = state.datum().id;
                     let stateName = state.datum().properties['name']
                     let targetData = state.datum().properties[leagueDict[clicked]]
-                    // console.log(leagueDict[clicked]);
-                    // console.log(totals);
+                    
                     const counter = (accumulator, currentValue) => accumulator + currentValue;
-
                     total = totals.reduce(counter);
-
                     var total_dict = {};
 
                     for (var i=0; i<leagues.length;i++) {
@@ -314,12 +305,9 @@
                     }
                     total_dict['Total Count'] = total;
 
-                    // console.log(total_dict);
-
                     let leaguePercent;
 
-                    
-
+                    //show background and gather data
                     if (pcts) {
                         d3.select("rect.hoverInfo").attr("height",40);
                         targetData = state.datum().properties[proportionDict[clicked]]
@@ -334,52 +322,53 @@
                         leaguePercent = `${leaguePercent}%`
                     }
 
-                    // console.log(leaguePercent);
-
+                    //apply hover mesh
                     var mo = topojson.mesh(us, us.objects.states, function(a, b) {return a.id === stateID || b.id === stateID;});
                     mouseoverMesh.datum(mo).attr("d", path)
                         .attr("class", "hoverMesh")
                 
+                    //show text
                     txt.text(stateName);
                     txt2.text(targetData);
                     txt3.text(leaguePercent);
                 
+                    //set boundries and move to correct location
                     let bounds = path.bounds( state.datum() );
                     
                     let xPos = (bounds[0][0]+bounds[1][0])/2.0;
                     let yPos = bounds[1][1];
                 
                     hoverInfo.attr("transform",`translate(${xPos},${yPos})`);
-                
-                    // To fix the oscillation mentioned at the end of the video, we add this in the CSS for .mouseover
-                    //  pointer-events: none;
-                
                 }
                 
                 function mouseLeavesPlot() {
+                    //remove hover info, hover mesh
                     hoverInfo.style("visibility","hidden");
                 
                     let state = d3.select(this);
                     
                     mouseoverMesh.attr("d", "");
-                
                 }
 
 
-
-
-                //button interactivity
+                // LEAGUE BUTTON INTERACTIVITY
                 let pcts = false;
 
                 const logos = ["images/nba.png", "images/mlb.png", "images/nfl.svg", "images/nhl.png", "Total"];
+
                 const leagueDict = {"images/nba.png": 'NBA', "images/mlb.png": 'MLB', "images/nfl.svg": 'NFL', "images/nhl.png": 'NHL', "Total": 'Total Count'};
+
                 const proportionDict = {"images/nba.png": 'NBA Proportion', "images/mlb.png": 'MLB Proportion', "images/nfl.svg": 'NFL Proportion', "images/nhl.png": 'NHL Proportion', "Total": 'Total Proportion'};
+
                 const pctDict = {"images/nba.png": nbaProportionScale, "images/mlb.png": mlbProportionScale, "images/nfl.svg": nflProportionScale, "images/nhl.png": nhlProportionScale, "Total": totalProportionScale};
+
                 const countDict = {"images/nba.png": nbaScale, "images/mlb.png": mlbScale, "images/nfl.svg": nflScale, "images/nhl.png": nhlScale, "Total": totalScale};
 
                 const pctExtents = {"images/nba.png": nbaProportionExtent, "images/mlb.png": mlbProportionExtent, "images/nfl.svg": nflProportionExtent, "images/nhl.png": nhlProportionExtent, "Total": totalProportionExtent};
+
                 const countExtents = {"images/nba.png": nbaExtent, "images/mlb.png": mlbExtent, "images/nfl.svg": nflExtent, "images/nhl.png": nhlExtent, "Total": totalExtent};
-                // let currentLeague = "Total";
+
+                // create and configure league filtering buttons
                 logos.forEach( d => {
                     if (d !== 'Total') {
                         if (d === 'images/nba.png' ) {
@@ -391,6 +380,7 @@
                                 .attr("height", "50")
                                 .on("click", function(){
                                     updateMap(d);
+                                    updateGuide();
                                 })
                             .append("img")
                                 .attr("src", d)
@@ -409,6 +399,7 @@
                             .attr("height", "50")
                             .on("click", function(){
                                 updateMap(d);
+                                updateGuide();
                             })
                             .append("img")
                             .attr("src", d)
@@ -429,14 +420,14 @@
                         .attr("height", "30")
                         .on("click", function(){
                             updateMap(d);
-                            updateGuide();
+                            updateGuide(true);
                         });
                     }
-                    
                 });
 
                 var clicked = "Total";
 
+                //add & configure display counts button (default to selected)
                 d3.select("div#toggle")
                     .append("button")
                     .attr('class', 'toggleButton selectedToggle')
@@ -445,14 +436,15 @@
                     .attr("width", "30")
                     .attr("height", "30")
                     .on("click", function(){
-                        d3.select("button#countButton").transition(100).attr("class", "toggleButton selectedToggle")
-                        d3.select("button#pctButton").transition(100).attr("class", "toggleButton")
+                        d3.select("button#countButton").transition().duration(100).attr("class", "toggleButton selectedToggle")
+                        d3.select("button#pctButton").transition().duration(100).attr("class", "toggleButton")
                         
                         pcts = false;
                         updateMap(clicked);
                         updateGuide();
                     });
 
+                // add & configure percentages button
                 d3.select("div#toggle")
                     .append("button")
                     .attr('class', 'toggleButton')
@@ -461,37 +453,31 @@
                     .attr("width", "30")
                     .attr("height", "30")
                     .on("click", function(){
-                        d3.select("button#countButton").transition(100).attr("class", "toggleButton")
-                        d3.select("button#pctButton").transition(100).attr("class", "toggleButton selectedToggle")
+                        d3.select("button#countButton").transition().duration(100).attr("class", "toggleButton")
+                        d3.select("button#pctButton").transition().duration(100).attr("class", "toggleButton selectedToggle")
                         
                         pcts = true;
                         updateMap(clicked);
                         updateGuide();
                     });
 
+                //select and display color legend
                 legend = d3.select("svg#colorScale");
-
                 drawLegend(totalScale);
 
                 // BRUSH
 
                 var filterFunc = d => true;
-
                 function pointPassesFilters(point) {
                     let stillPassed = true;
-                    // console.log(filterFunc(point));
                     stillPassed = filterFunc(point) && stillPassed;
-                    // if (stillPassed) {
-                    //     console.log(point);
-                    // }
                     return stillPassed;
                 }
-
-                // var names = [];
 
                 function brushMap() {
                     var ids = [];
 
+                    //filter states based on brush
                     states.features.forEach(state => {
                         let prop;
                         if (pcts) {
@@ -500,33 +486,29 @@
                             prop = state.properties[leagueDict[clicked]];
                         }
                         let id = state['id'];
-
-                        // brushMesh.attr("d", "");
                         
                         if (pointPassesFilters(prop)) {
                             ids.push(id);
-                            // map.select(`[state=${name}]`).attr("opacity", "1");
                         }
-                        // else {
-
-                        // }
-                        
                     });
 
+                    //create brush mesh state overlay
                     var mo = topojson.mesh(us, us.objects.states, function(a, b) {return ids.includes(a.id) || ids.includes(b.id);});
-                    // console.log(mo);
                     brushMesh.datum(mo).attr("d", path)
                         .attr("class", "brushMesh");
 
+                    //raise mouseover guide above brush mesh overlays
                     d3.select("g.mouseover").raise();
                 }
-
-                // brushMap();
 
                 var brush = d3.brushX().extent([[0,10],[legend.attr("width")-40, 60]])
                                 .on("brush end", brushMoved);
 
                 function brushMoved(event) {
+                    //show brush
+                    d3.select("g.brush").attr("visibility", "")
+
+                    //set scale for brush
                     let scale;
                     if (pcts) {
                         scale = pctExtents[clicked];
@@ -534,37 +516,23 @@
                         scale = countExtents[clicked];
                     }
 
+                    // handle brush selections
                     if (event.selection !== null) {
                         let denom = 860 / scale[1];
                         let start = (event.selection[0]) / denom;
                         let end = (event.selection[1]) / denom;
-
-                        // console.log(start, end);
                         
                         filterFunc = d => d >= start && d <= end;
-
-                        // updateMap(clicked);
                         brushMap();
-                        
-                        
                     } else {
                         let filterFunc = d => true;
-                        // updateMap(clicked);
                         brushMap();
                     }
                 }
 
                 legend.append("g").attr("class","brush").attr("transform", "translate(20, 0)").call(brush);
 
-                // var brush = d3.brushX().extent([[0,10],[legend.attr("width"), 60]])
-                //                 .on("brush end", brushMoved);
-
-                // var brush;
-
                 function drawLegend(scale) {
-
-                    console.log(scale.range())
-
                     const legendWidth = legend.attr("width");
                     const legendHeight = legend.attr("height");
                     const legendMinMax = d3.extent(scale.domain());
@@ -574,14 +542,16 @@
                     const barScale = d3.scaleLinear().domain([legendMinMax[0],legendMinMax[1]]).range([0,legendWidth-40]);
                     const barAxis = d3.axisBottom(barScale);
 
-                    // console.log(legendMinMax);
+                    // clear previous color legend
                     legend.selectAll(".colorbar").remove();
 
+                    //add new color legend axis
                     legend.append("g")
 							.attr("class", "colorbar axis")
 							.attr("transform","translate("+(20)+","+(barHeight+10)+")")
 							.call(barAxis);
-						
+					
+                    //add new color legend and fill
                     let bar = legend.append("g").attr("class","colorbar").attr("transform","translate("+(20)+","+(10)+")").lower();
                     
                     for (let i=0; i<legendWidth-40; i=i+stepSize) {
@@ -592,56 +562,39 @@
                             .attr("height",barHeight)
                             .style("fill", scale( pixelScale(i) ));
                     }
-
-                    // var brush = d3.brushX().extent([[0,10],[legend.attr("width"), 60]])
-                    //             .on("brush end", brushMoved);
-
-                    // legend.append("g").attr("class","brush").call(brush);
-                    
                 }
-
-                
-                // legend.append("g").attr("class","brush").raise().call(brush);
-
 
                 function updateMap(d) {
                     clicked = d;
 
-                    
+                    // hide brush & remove brush overlay when league changed
+                    d3.select("g.brush").attr("visibility", "hidden")
                     brushMesh.attr("d", "");
-
-
-                    // const pctDict = {"images/nba.png": nbaProportionScale, "images/mlb.png": mlbProportionScale, "images/nfl.svg": nflProportionScale, "images/nhl.png": nhlProportionScale, "Total": totalProportionScale};
-                    // const countDict = {"images/nba.png": nbaScale, "images/mlb.png": mlbScale, "images/nfl.svg": nflScale, "images/nhl.png": nhlScale, "Total": totalScale};
-
-                    // proportionDict = {"images/nba.png": 'NBA Proportion', "images/mlb.png": 'MLB Proportion', "images/nfl.svg": 'NFL Proportion', "images/nhl.png": 'NHL Proportion', "Total": 'Total Proportion'};
                     
+                    // recolor & brush map based on filtered data
                     if (pcts) {
                         map.selectAll("path").data(states.features)
                             .attr("fill", s => pctDict[d](s.properties[proportionDict[d]]));
                         drawLegend(pctDict[d]);
-                        console.log(d);
                         brushMap();
                     } else {
                         map.selectAll("path").data(states.features)
                             .attr("fill", s => countDict[d](s.properties[leagueDict[d]]));
-                        console.log(countDict[d])
-                        console.log(d)
 
                         drawLegend(countDict[d]);
-                        console.log(d);
                         brushMap();
                     }
 
+                    // handle styling for clicked league button
                     d3.select(`button#${leagueDict[clicked]}`).attr("class", 'selected').style("font-weight", "bold");
 
+                    // style selected/unselected league buttons
                     for (let l in leagueDict) {
                         if (l === d) {
                             if (l === 'Total') {
                                 d3.select(`button#${l}`).attr("class", 'selected').style("font-weight", "bold");
                             } else {
                                 d3.select(`button#${leagueDict[l]}`).attr("class", 'selected').style("font-weight", "bold");
-
                             }
                         } else {
                             if (l === 'Total') {
@@ -651,6 +604,8 @@
                             }  
                         }
                     }
+                    //remove brush filter when map is changed
+                    brushMesh.attr("d", "");
                 }
 
                 function getSum(dset){
@@ -694,37 +649,38 @@
                 {"league": 'MLB', "count": mlbPct},
                 {"league": 'NFL', "count": nflPct},
                 {"league": 'NHL', "count": nhlPct}]
-            
-                let bottomAxis = d3.axisBottom(leagueScale)
+
+                //create axes & gridlines
+                let bottomAxis = d3.axisBottom(leagueScale);
                 annotations.append("g")
-                           .attr("class", "x axis")
+                           .attr("class", "x-axis")
                            .attr("transform",`translate(${margin.left},${chartHeight+margin.top})`)
                            .call(bottomAxis);
 
-                let leftAxis = d3.axisLeft(nationTotalScale)//.ticks(5).tickFormat(d3.format('.0%'));
+                let leftAxis = d3.axisLeft(nationTotalScale);
                 let leftAxisG = annotations.append("g")
-                            .attr("class", "y axis")
+                            .attr("class", "y-axis")
                             .attr("transform",`translate(${margin.left},${margin.top})`)
-                            .call(leftAxis)
+                            .call(leftAxis);
 
                 let leftGridlines = d3.axisLeft(nationTotalScale)
                                         .tickSize(-chartWidth)
-                                        .tickFormat("")
-                                        // .ticks(5)
+                                        .tickFormat("");
 
                 let leftGridlinesG = annotations.append("g")
                             .attr("class", "gridlines")
                             .attr("transform",`translate(${margin.left},${margin.top})`)
                             .call(leftGridlines);
 
-                let rightAxis = d3.axisRight(nationPCTScale).tickFormat(d3.format('%')) //.ticks(5);
+                let rightAxis = d3.axisRight(nationPCTScale).tickFormat(d3.format('%'));
                 let rightAxisG = annotations.append("g")
-                            .attr("class", "y axis")
+                            .attr("class", "right-axis")
                             .attr("transform",`translate(${margin.left+chartWidth},${margin.top})`)
-                            .call(rightAxis)
+                            .call(rightAxis);
 
-                graphArea.attr("transform", 'translate(109, 10)')
+                graphArea.attr("transform", 'translate(109, 10)');
 
+                //plot bars
                 graphArea.selectAll('rect.bar').data(nationGraphData)
                     .join('rect').attr("class", "bar")
                         .attr("id", d => d['league'])
@@ -740,28 +696,29 @@
                             d3.select(this).attr("stroke", "none")
                         })
 
-                
-
+                //update graph on state clicks
                 d3.selectAll(".state").on("click",  updateGraph);
 
+                //create graph hover info box
                 const mouseover = annotations.append("g").attr("class","mouseover")
                        .attr("transform",`translate(${margin.left+15},${margin.top+15})`)
                        .raise();
 
-                    const frame = mouseover.append("rect").attr("class","frame")
-                        .attr("x", 0).attr("y", 0)
-                        .attr("height", 93)
-                        .attr("width", 382)
-                        .attr("fill", "rgba(219, 234, 255, 0.9)")
-                        .attr("stroke", "navy")
-                        .raise();
-                    const textbox = mouseover.append("g").attr("transform","translate(10,10)").raise();
-                    const format = d3.format(',d');
+                const frame = mouseover.append("rect").attr("class","frame")
+                    .attr("x", 0).attr("y", 0)
+                    .attr("height", 93)
+                    .attr("width", 385)
+                    .attr("fill", "rgba(219, 234, 255, 0.9)")
+                    .attr("stroke", "navy")
+                    .raise();
+                const textbox = mouseover.append("g").attr("transform","translate(10,10)").raise();
+                const format = d3.format(',d');
 
                 mouseover.attr("visibility", "hidden");
 
                 let clickedState="Total";
                 function updateGraph(){
+                    // if state set to none, remove click mesh
                     if (clickedState !== "Total"){
                         clickMesh.attr("d", "");
                     }
@@ -771,6 +728,7 @@
                     let stateID = clickedState.datum().id;
                     let stateName = clickedState.datum().properties['name']
 
+                    //add mesh to clicked state
                     var mo = topojson.mesh(us, us.objects.states, function(a, b) {return a.id === stateID || b.id === stateID;});
                     clickMesh.datum(mo).attr("d", path)
                         .attr("class", "clickMesh")
@@ -780,6 +738,7 @@
                     let selectedData = {}
                     let dataArray = []
 
+                    //update and select filtered data & scales
                     selectedData = {
                         "NBA":clickedState.datum().properties['NBA'],
                         "MLB":clickedState.datum().properties['MLB'],
@@ -803,57 +762,55 @@
                     let pctExtent = d3.extent(pctsArray);
                     let updatedPctScale = d3.scaleLinear().domain([0, (1.1*pctExtent[1])]).range([chartHeight, 0]);
 
+                    // update bars
                     let bars = graphArea.selectAll('rect.bar').data(graphData)
                     .join('rect').attr("class", "bar")
                         .on("mouseover", function(d) {
                             d3.select(this).attr("stroke-width", 3).attr("stroke", "black")
-                            updateMouseover(d, clickedState, textbox)
-                            mouseover.attr("visibility","")})
+                            updateMouseover(d, clickedState, textbox);
+                            if (clickedState !== "Total"){
+                                mouseover.attr("visibility","");
+                            }
+                        })
                         .on("mouseout", function() {
                             d3.select(this).attr("stroke", "none").attr("stroke-width", 1)
                             mouseover.attr("visibility","hidden");
                         })
-                        .transition(1000)
+                        .transition().duration(500)
                         .attr("y", d => (updatedScale(d['count'])))
                         .attr("height", d => (updatedScale(0) - updatedScale(d['count'])))
 
-                    // bars
-                        
-
+                    // update axes & gridlines
                     leftAxis = d3.axisLeft(updatedScale); //.tickFormat(d3.format('.0%'));
-                    leftAxisG.transition().call(leftAxis)
+                    leftAxisG.transition().duration(500).call(leftAxis)
 
                     rightAxis = d3.axisRight(updatedPctScale);
-                    rightAxisG.transition().call(rightAxis)
+                    rightAxisG.transition().duration(500).call(rightAxis)
 
                     leftGridlines = d3.axisLeft(updatedScale)
                                         .tickSize(-chartWidth)
                                         .tickFormat("")
 
-                    leftGridlinesG.transition().call(leftGridlines);
-
-                    let selectedScale = true;
+                    leftGridlinesG.transition().duration(500).call(leftGridlines);
 
                     d3.select("h2#graphHeader").text(stateName)
                 }
 
                 function updateMouseover(d, state, textbox) {
                     d = d.toElement.__data__
-                    console.log(d)
                     hoverPct = state.datum().properties[`${d['league']} Proportion`]
                     pctOfLeague = 100 * d['count'] / totalsMap[d['league']]
                 
-                    textbox.html('');  // shorthand to empty out an element
-                    
+                    //empty existing text
+                    textbox.html('');
+
+                    //set new text
                     let hoveredLeague = `League: ${d['league']}`;
                     let countText = `Number of players: ${d['count']}`;
                     let pctText = `Percent of population as pros: ${hoverPct.toFixed(8)}%`;
                     let pctLeagueText = `Percent of ${d['league']} Americans from this state: ${pctOfLeague.toFixed(4)}%`;
 
-                    
-                    // let maxWidth = Math.max( stringLen(stateName), stringLen(result), stringLen(diff), stringLen(evote), stringLen(pop), stringLen(ppv) )
-                    // frame.attr("width", maxWidth+20);
-                    
+                    //show text
                     textbox.append("text").text(hoveredLeague)
                         .attr("x", 0).attr("y", 10);
                     textbox.append("text").text(countText)
@@ -866,25 +823,28 @@
                 }
 
                 function resetGraph(){
-                    //remove state mesh
+                    //remove click and brush meshes
                     clickMesh.attr("d", "");
-                        // textbox.html('');
                     brushMesh.attr("d", "");
 
+                    //hide brush
+                    d3.select("g.brush").attr("visibility", "hidden")
 
                     //reset bars to national data
                     let bars = graphArea.selectAll('rect.bar').data(nationGraphData)
                     .join('rect').attr("class", "bar")
-                        .transition(1000)
+                        .transition().duration(500)
                         .attr("y", d => (nationTotalScale(d['count'])))
                         .attr("height", d => (nationTotalScale(0) - nationTotalScale(d['count'])))
 
                     //reset scales
                     leftAxis = d3.axisLeft(nationTotalScale); 
-                    leftAxisG.transition().call(leftAxis)
+                    leftAxisG.transition().duration(500).call(leftAxis)
 
                     rightAxis = d3.axisRight(nationPCTScale);
-                    rightAxisG.transition().call(rightAxis)
+                    rightAxisG.transition().duration(500).call(rightAxis)
+
+                    clickedState = "Total";
 
                     //reset header text
                     d3.select("h2#graphHeader").text("National Pro Athlete Counts")
@@ -917,14 +877,14 @@
                     .attr("id", "guide3")
                     .text("% of athletes from here");
 
-                function updateGuide(){
-                    console.log("test!")
+                function updateGuide(total=false){
+                    // dynamically update hover info guide on sidebar based on current display
                     if (pcts){
                         guide2.text("% of population that are filtered athletes");
                         guide3.text("");
                     } else {
                         guide2.text("Number of athletes");
-                        if (clickedState !== "Totals"){
+                        if ((clickedState !== "Totals")&&(total===false)){
                             guide3.text("% of league from here");
                         } else{
                             guide3.text("% of athletes from here");
@@ -932,13 +892,12 @@
                     }
                 }
 
-
-    
-                
+                //general svg text styling
+                d3.selectAll("text").style("font-family", "'Trebuchet MS', 'Tahoma', 'Verdana', Arial, sans-serif")     
+                d3.selectAll(".x-axis text").style("font-size", "2em")         
             }
             requestData();
 
         </script>
-    
     </body>
 </html>
