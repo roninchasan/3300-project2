@@ -191,7 +191,7 @@ button:focus {outline:0;}
 }
 
 .gridlines{
-    color: lightgrey;
+    color: darkgrey;
     opacity: 0.5;
 }
 
