@@ -672,7 +672,7 @@
                             .attr("transform",`translate(${margin.left},${margin.top})`)
                             .call(leftGridlines);
 
-                let rightAxis = d3.axisRight(nationPCTScale).tickFormat(d3.format('%'));
+                let rightAxis = d3.axisRight(nationPCTScale).tickFormat(d3.format('.4%'));
                 let rightAxisG = annotations.append("g")
                             .attr("class", "right-axis")
                             .attr("transform",`translate(${margin.left+chartWidth},${margin.top})`)
@@ -776,7 +776,7 @@
                     let updatedScale = d3.scaleLinear().domain([0, (1.1*graphExtent[1])]).range([chartHeight, 0]);
                     
                     let pctExtent = d3.extent(pctsArray);
-                    let updatedPctScale = d3.scaleLinear().domain([0, (1.1*pctExtent[1])]).range([chartHeight, 0]);
+                    let updatedPctScale = d3.scaleLinear().domain([0, (1.1*(pctExtent[1])/100)]).range([chartHeight, 0]);
 
                     // update bars
                     let bars = graphArea.selectAll('rect.bar').data(graphData)
@@ -813,7 +813,7 @@
                     leftAxis = d3.axisLeft(updatedScale); //.tickFormat(d3.format('.0%'));
                     leftAxisG.transition().duration(500).call(leftAxis)
 
-                    rightAxis = d3.axisRight(updatedPctScale);
+                    rightAxis = d3.axisRight(updatedPctScale).tickFormat(d3.format('.5%'));
                     rightAxisG.transition().duration(500).call(rightAxis)
 
                     leftGridlines = d3.axisLeft(updatedScale)
@@ -889,8 +889,14 @@
                     leftAxis = d3.axisLeft(nationTotalScale); 
                     leftAxisG.transition().duration(500).call(leftAxis)
 
-                    rightAxis = d3.axisRight(nationPCTScale);
+                    rightAxis = d3.axisRight(nationPCTScale).tickFormat(d3.format('.4%'));
                     rightAxisG.transition().duration(500).call(rightAxis)
+
+                    leftGridlines = d3.axisLeft(nationTotalScale)
+                        .tickSize(-chartWidth)
+                        .tickFormat("")
+
+                    leftGridlinesG.transition().duration(500).call(leftGridlines);
 
                     clickedState = "Total";
 
