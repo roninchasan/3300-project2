@@ -24,6 +24,7 @@
             <h1 style="text-align: center;">Where are professional athletes from in the US?</h1>
             <svg id="choropleth" height="670" width="975"></svg>
             <svg id = "colorScale" height = "100" width = "900"></svg>
+            <p id="graphHeader">Select a state above to see its athlete breakdown by league.</p>
             <h2 id="graphHeader">National Pro Athlete Counts</h2>
             <svg id="graph" height="610" width="975"></svg>
         </div>
@@ -184,9 +185,11 @@
                 
                 // extents and color scales for map
                 nbaExtent = d3.extent(nba, d => d['Count']);
+                nbaExtent[0] = 0;
                 mlbExtent = d3.extent(mlb, d => d['Count']);
                 nflExtent = d3.extent(nfl, d => d['Count']);
                 nhlExtent = d3.extent(nhl, d => d['Count']);
+                nhlExtent[0] = 0;
                 totalExtent = d3.extent(totalCounts)
 
                 let nbaProportionExtent = d3.extent(nbaProportions);
@@ -519,6 +522,7 @@
                     // handle brush selections
                     if (event.selection !== null) {
                         let denom = 860 / scale[1];
+
                         let start = (event.selection[0]) / denom;
                         let end = (event.selection[1]) / denom;
                         
