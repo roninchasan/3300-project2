@@ -688,12 +688,27 @@
                         .attr("x", d => leagueScale(d['league']))
                         .attr("y", d => (nationTotalScale(d['count'])))
                         .attr("height", d => (nationTotalScale(0) - nationTotalScale(d['count'])))
-                        .attr("width", "100px" )
+                        .attr("width", 100 )
+                        .attr("opacity", 0.7)
                         .on("mouseover", function() {
-                            d3.select(this).attr("stroke-width", 3).attr("stroke", "black")
+                            d3.select(this).transition().duration(200)
+                                .attr("stroke-width", 3)
+                                .attr("stroke", "black")
+                                .attr("x", d => leagueScale(d['league']) + 1)
+                                .attr("y", d => (nationTotalScale(d['count']) + 1 ))
+                                .attr("height", d => (nationTotalScale(0) - nationTotalScale(d['count']) - 1.5))
+                                .attr("width", 99 )
+                                .attr("opacity", 1)
+
                         })
                         .on("mouseout", function() {
-                            d3.select(this).attr("stroke", "none")
+                            d3.select(this).transition().duration(200)
+                                .attr("stroke", "none")
+                                .attr("x", d => leagueScale(d['league']) )
+                                .attr("y", d => (nationTotalScale(d['count'])))
+                                .attr("height", d => (nationTotalScale(0) - nationTotalScale(d['count'])))
+                                .attr("opacity", 0.7)
+                                .attr("width", 100)
                         })
 
                 //update graph on state clicks
@@ -714,7 +729,8 @@
                 const textbox = mouseover.append("g").attr("transform","translate(10,10)").raise();
                 const format = d3.format(',d');
 
-                mouseover.attr("visibility", "hidden");
+                mouseover.style("opacity", 0);
+
 
                 let clickedState="Total";
                 function updateGraph(){
@@ -766,15 +782,28 @@
                     let bars = graphArea.selectAll('rect.bar').data(graphData)
                     .join('rect').attr("class", "bar")
                         .on("mouseover", function(d) {
-                            d3.select(this).attr("stroke-width", 3).attr("stroke", "black")
-                            updateMouseover(d, clickedState, textbox);
+                            d3.select(this).transition().duration(200)
+                                .attr("stroke-width", 3)
+                                .attr("stroke", "black")
+                                .attr("y", d => (updatedScale(d['count']) + 1 ))
+                                .attr("height", d => (updatedScale(0) - updatedScale(d['count']) - 1.5))
+                                .attr("width", 99 )
+                                .attr("opacity", 1);
+                            
                             if (clickedState !== "Total"){
-                                mouseover.attr("visibility","");
+                                updateMouseover(d, clickedState, textbox);
+                                mouseover.transition().duration(300).style("opacity",1);
                             }
                         })
                         .on("mouseout", function() {
-                            d3.select(this).attr("stroke", "none").attr("stroke-width", 1)
-                            mouseover.attr("visibility","hidden");
+                            d3.select(this).transition().duration(200)
+                                .attr("stroke", "none")
+                                .attr("y", d => (updatedScale(d['count'])))
+                                .attr("height", d => (updatedScale(0) - updatedScale(d['count'])))
+                                .attr("opacity", 0.7)
+                                .attr("width", 100)
+                            
+                            mouseover.transition().duration(300).style("opacity",0);
                         })
                         .transition().duration(500)
                         .attr("y", d => (updatedScale(d['count'])))
@@ -833,6 +862,25 @@
                     //reset bars to national data
                     let bars = graphArea.selectAll('rect.bar').data(nationGraphData)
                     .join('rect').attr("class", "bar")
+                        .on("mouseover", function() {
+                            d3.select(this).transition().duration(200)
+                                .attr("stroke-width", 3)
+                                .attr("stroke", "black")
+                                .attr("x", d => leagueScale(d['league']) + 1)
+                                .attr("y", d => (nationTotalScale(d['count']) + 1 ))
+                                .attr("height", d => (nationTotalScale(0) - nationTotalScale(d['count']) - 1.5))
+                                .attr("width", 99 )
+                                .attr("opacity", 1)
+                        })
+                        .on("mouseout", function() {
+                            d3.select(this).transition().duration(200)
+                                .attr("stroke", "none")
+                                .attr("x", d => leagueScale(d['league']) )
+                                .attr("y", d => (nationTotalScale(d['count'])))
+                                .attr("height", d => (nationTotalScale(0) - nationTotalScale(d['count'])))
+                                .attr("opacity", 0.7)
+                                .attr("width", 100)
+                        })
                         .transition().duration(500)
                         .attr("y", d => (nationTotalScale(d['count'])))
                         .attr("height", d => (nationTotalScale(0) - nationTotalScale(d['count'])))
