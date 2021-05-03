@@ -195,8 +195,19 @@ button:focus {outline:0;}
     opacity: 0.5;
 }
 
+#mainHead{
+    text-align: center;
+    font-size: 40px;
+}
+
 #graphHeader{
     width: 100%;
+    text-align: center;
+}
+
+.mainText{
+    width: 90%;
+    margin: auto;
     text-align: center;
 }
 
