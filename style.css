@@ -173,19 +173,19 @@ button:focus {outline:0;}
 }
 
 .hoverMesh{
-    stroke: black;
+    stroke: grey;
     stroke-width: 2px;
     fill: none;
 }
 
 .clickMesh{
-    stroke: grey;
+    stroke: black;
     stroke-width: 4px;
     fill: none;
 }
 
 .brushMesh{
-    stroke: lime;
+    stroke: green;
     stroke-width: 1.5px;
     fill: none;
 }
