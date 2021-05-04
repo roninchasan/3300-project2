@@ -187,7 +187,7 @@ button:focus {outline:0;}
 .brushMesh{
     stroke: lime;
     stroke-width: 1.5px;
-    stroke-dasharray: 4 1;
+    stroke-dasharray: 4 2;
     fill: none;
 }
 
