@@ -180,12 +180,12 @@ button:focus {outline:0;}
 
 .clickMesh{
     stroke: grey;
-    stroke-width: 3.5px;
+    stroke-width: 4px;
     fill: none;
 }
 
 .brushMesh{
-    stroke: darkgreen;
+    stroke: lime;
     stroke-width: 1.5px;
     fill: none;
 }
