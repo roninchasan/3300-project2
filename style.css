@@ -180,7 +180,7 @@ button:focus {outline:0;}
 
 .clickMesh{
     stroke: black;
-    stroke-width: 4px;
+    stroke-width: 3.5px;
     fill: none;
 }
 
